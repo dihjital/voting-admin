@@ -87,8 +87,23 @@ class ShowOneQuestion extends Component
         $this->resetValidation();
 
         $this->vote_text = '';
-
         $this->new_vote = !$this->new_vote;
+    }
+
+    public function vote($vote_id)
+    {
+        try {
+            // Vote ...
+            $response = Http::patch(self::URL.'/questions/'.$this->question_id.'/votes/'.$vote_id);
+
+            if ($response->status() !== 200) {
+                throw new \Exception("Return HTTP status code is not 200!");
+            }
+
+            $this->banner(__('Successful vote'));
+        } catch (\Exception $e) {
+            $this->error_message = $e->getMessage();
+        }
     }
 
     public function create()

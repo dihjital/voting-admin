@@ -9,6 +9,12 @@ trait WithLogin
     public $access_token;
     public $refresh_token;
 
+    public function initializeWithLogin()
+    {
+        $this->api_user = env('API_USER');
+        $this->api_secret = env('API_SECRET');
+    }
+
     protected function login(): array 
     {
         $access_token = session()->get('access_token');
@@ -23,8 +29,8 @@ trait WithLogin
         try {
             $response = $client->post(self::getURL().'/login', [
                 'form_params' => [
-                    'email' => 'alexandra.csonka13@gmail.com',
-                    'password' => 'GailBa1!',
+                    'email' => $this->api_user,
+                    'password' => $this->api_secret,
                 ],
             ]);
             $tokenData = json_decode($response->getBody(), true);

@@ -15,9 +15,10 @@
     @else
     <x-table>
         <x-slot name="head">
-            <x-table.heading class="w-2/12">{{ __('Vote number') }}</x-table.heading>
+            <x-table.heading class="w-1/12">{{ __('Vote number') }}</x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Vote text') }}</x-table.heading>
             <x-table.heading class="w-2/12">{{ __('Number of votes received') }}</x-table.heading>
+            <x-table.heading class="w-1/12">{{ __('Vote') }}</x-table.heading>
             <x-table.heading class="w-2/12"></x-table.heading>
         </x-slot>
         <x-slot name="body">
@@ -26,6 +27,11 @@
                 <x-table.cell>{{ $v['id'] }}</x-table.cell>
                 <x-table.cell>{{ $v['vote_text'] }}</x-table.cell>
                 <x-table.cell>{{ $v['number_of_votes'] }}</x-table.cell>
+                <x-table.cell>
+                    <button type="button" wire:click="vote({{ $v['id'] }})" class="px-3 py-3 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md">
+                        <i class="fas fa-plus fa-sm" aria-hidden="true" title="{{ __('Vote') }}"></i>
+                    </button>
+                </x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">
                     <button type="button" wire:click="toggleUpdateVoteModal({{ $v['id'] }})" class="px-3 py-3 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md">
                         <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
@@ -37,9 +43,9 @@
             </x-table.row>
             @empty
             <x-table.row wire:key="row-empty">
-                <x-table.cell rowspan="4" class="whitespace-nowrap">
+                <x-table.cell colspan="5" class="whitespace-nowrap">
                     <div class="flex justify-center items-center">
-                        <span class="py-8 text-base font-medium text-gray-400 uppercase">{{ __('There are no votes associated with this questions yet in the database') }} ...</span>
+                        <span class="py-8 text-base font-medium text-gray-400 uppercase">{{ __('There are no votes associated with this question yet in the database') }} ...</span>
                     </div>
                 </x-table.cell>
             </x-table.row>
@@ -92,7 +98,7 @@
             <div class="mt-4" x-data="{}" x-on:confirming-vote-text-update.window="setTimeout(() => $refs.vote_text.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"
                             autocomplete=""
-                            placeholder="{{ $vote_text }}"
+                            placeholder="{{ old('$vote_text') }}"
                             x-ref="vote_text"
                             wire:model.defer="vote_text"
                             wire:keydown.enter="update({{ $vote_id }})" />

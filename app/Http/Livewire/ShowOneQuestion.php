@@ -25,16 +25,13 @@ class ShowOneQuestion extends Component
     public $update_vote = false;
     public $new_vote = false;
 
-    const URL = 'http://localhost:8000';
-    // const URL = '159.223.131.76';
-
     protected $rules = [
         'vote_text' => 'required|min:6',
     ];
 
     public static function getURL(): string
     {
-        return self::URL;
+        return env('API_ENDPOINT');
     }
 
     public function mount($question_id)
@@ -47,11 +44,11 @@ class ShowOneQuestion extends Component
     {
         try {
             // Get the votes ...
-            $response = Http::get(self::URL.'/questions/'.$this->question_id.'/votes');
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes');
             $this->votes = $response->json();
 
             // Get the question text ..
-            $response = Http::get(self::URL.'/questions/'.$this->question_id);
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
@@ -75,7 +72,7 @@ class ShowOneQuestion extends Component
         
         try {
             // Get the selected vote text...
-            $response = Http::get(self::URL.'/questions/'.$this->question_id.'/votes/'.$vote_id);
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
             $this->vote_text = $response->json()['vote_text'];
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
@@ -95,7 +92,7 @@ class ShowOneQuestion extends Component
     {
         try {
             // Vote ...
-            $response = Http::patch(self::URL.'/questions/'.$this->question_id.'/votes/'.$vote_id);
+            $response = Http::patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
 
             if ($response->status() !== 200) {
                 throw new \Exception("Return HTTP status code is not 200!");
@@ -118,7 +115,7 @@ class ShowOneQuestion extends Component
         try {
             // Create a new vote ...
             $response = Http::withToken($this->access_token)
-                ->post(self::URL.'/questions/'.$this->question_id.'/votes', [
+                ->post(self::getURL().'/questions/'.$this->question_id.'/votes', [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
                 ]);
@@ -149,7 +146,7 @@ class ShowOneQuestion extends Component
         try {
             // Update the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->put(self::URL.'/questions/'.$this->question_id.'/votes/'.$vote_id, [
+                ->put(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id, [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
                 ]);
@@ -178,7 +175,7 @@ class ShowOneQuestion extends Component
         try {
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->delete(self::URL.'/questions/'.$this->question_id.'/votes/'.$vote_id);
+                ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
 
             if ($response->status() !== 200) {
                 throw new \Exception("Return HTTP status code is not 200!");

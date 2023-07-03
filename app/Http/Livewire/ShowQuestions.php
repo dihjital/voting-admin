@@ -24,9 +24,6 @@ class ShowQuestions extends Component
     public $update_question = false;
     public $new_question = false;
 
-    const URL = 'http://localhost:8000';
-    // const URL = '159.223.131.76';
-
     const PAGINATING = TRUE;
 
     protected $rules = [
@@ -40,7 +37,7 @@ class ShowQuestions extends Component
 
     public static function getURL(): string
     {
-        return self::URL;
+        return env('API_ENDPOINT');
     }
 
     public static function getPAGINATING(): bool
@@ -73,7 +70,7 @@ class ShowQuestions extends Component
         
         try {
             // Get the selected question text...
-            $response = Http::get(self::URL.'/questions/'.$this->question_id);
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
@@ -91,7 +88,7 @@ class ShowQuestions extends Component
         try {
             // Create a new vote ...
             $response = Http::withToken($this->access_token)
-                ->post(self::URL.'/questions', [
+                ->post(self::getURL().'/questions', [
                     'question_text' => $this->question_text,
                 ]);
 
@@ -121,7 +118,7 @@ class ShowQuestions extends Component
         try {
             // Update the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->put(self::URL.'/questions/'.$this->question_id, [
+                ->put(self::getURL().'/questions/'.$this->question_id, [
                     'question_text' => $this->question_text,
                 ]);
 
@@ -149,7 +146,7 @@ class ShowQuestions extends Component
         try {
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->delete(self::URL.'/questions/'.$this->question_id);
+                ->delete(self::getURL().'/questions/'.$this->question_id);
 
             if ($response->status() !== 200) {
                 throw new \Exception("Return HTTP status code is not 200!");
@@ -166,7 +163,7 @@ class ShowQuestions extends Component
     public function fetchData($page = null)
     {
         try {
-            $url = self::URL.'/questions';
+            $url = self::getURL().'/questions';
             
             if (self::PAGINATING) {
                 $currentPage = $page ?? request('page', 1);

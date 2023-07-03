@@ -16,6 +16,9 @@ trait WithLogin
     {
         $this->api_user = env('API_USER');
         $this->api_secret = env('API_SECRET');
+
+        $this->client_id = env('PASSPORT_CLIENT_ID');
+        $this->client_secret = env('PASSPORT_CLIENT_SECRET');
     }
 
     protected function refreshToken(): array
@@ -29,8 +32,8 @@ trait WithLogin
             $response = Http::asForm()->post(env('PASSPORT_LOGIN_ENDPOINT'), [
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $refresh_token,
-                'client_id' => env('PASSPORT_CLIENT_ID'),
-                'client_secret' => env('PASSPORT_CLIENT_SECRET'),
+                'client_id' => $this->client_id,
+                'client_secret' => $this->client_secret,
                 'scope' => '',
             ]);
 

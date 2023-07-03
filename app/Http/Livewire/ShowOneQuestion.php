@@ -26,6 +26,7 @@ class ShowOneQuestion extends Component
     public $new_vote = false;
 
     const URL = 'http://localhost:8000';
+    // const URL = '159.223.131.76';
 
     protected $rules = [
         'vote_text' => 'required|min:6',

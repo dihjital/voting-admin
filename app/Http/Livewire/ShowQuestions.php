@@ -25,6 +25,8 @@ class ShowQuestions extends Component
     public $new_question = false;
 
     const URL = 'http://localhost:8000';
+    // const URL = '159.223.131.76';
+
     const PAGINATING = TRUE;
 
     protected $rules = [

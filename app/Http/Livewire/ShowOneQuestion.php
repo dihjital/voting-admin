@@ -25,13 +25,15 @@ class ShowOneQuestion extends Component
     public $update_vote = false;
     public $new_vote = false;
 
+    const URL = 'http://localhost:8000';
+
     protected $rules = [
         'vote_text' => 'required|min:6',
     ];
 
     public static function getURL(): string
     {
-        return env('API_ENDPOINT');
+        return env('API_ENDPOINT', self::URL);
     }
 
     public function mount($question_id)

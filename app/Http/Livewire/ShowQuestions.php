@@ -24,6 +24,7 @@ class ShowQuestions extends Component
     public $update_question = false;
     public $new_question = false;
 
+    const URL = 'http://localhost:8000';
     const PAGINATING = TRUE;
 
     protected $rules = [
@@ -37,7 +38,7 @@ class ShowQuestions extends Component
 
     public static function getURL(): string
     {
-        return env('API_ENDPOINT');
+        return env('API_ENDPOINT', self::URL);
     }
 
     public static function getPAGINATING(): bool

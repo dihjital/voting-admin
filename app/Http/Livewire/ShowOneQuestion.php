@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire;
 
-use App\Http\Livewire\Traits\WithLogin;
+use App\Http\Livewire\Traits\WithOAuthLogin;
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
 use Laravel\Jetstream\InteractsWithBanner;
@@ -10,7 +10,10 @@ use Laravel\Jetstream\InteractsWithBanner;
 class ShowOneQuestion extends Component
 {
 
-    use InteractsWithBanner, WithLogin;
+    use InteractsWithBanner, WithOAuthLogin;
+
+    public $access_token;
+    public $refresh_token;
 
     public $question_text;
     public $question_id;
@@ -31,15 +34,20 @@ class ShowOneQuestion extends Component
         'vote_text' => 'required|min:6',
     ];
 
-    public static function getURL(): string
-    {
-        return env('API_ENDPOINT', self::URL);
-    }
-
     public function mount($question_id)
     {
         $this->question_id = $question_id;
-        list($this->access_token, $this->refresh_token) = $this->login();
+
+        try {
+            list($this->access_token, $this->refresh_token) = $this->login();
+        } catch (\Exception $e) {
+            $this->error_message = $e->getMessage();
+        }
+    }
+
+    public static function getURL(): string
+    {
+        return env('API_ENDPOINT', self::URL);
     }
 
     public function fetchData()

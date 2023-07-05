@@ -22,10 +22,22 @@
             <x-table.heading class="w-2/12"></x-table.heading>
         </x-slot>
         <x-slot name="body">
+            @php
+                $sum_of_votes = array_reduce($votes, fn($carry, $v) => $carry += $v['number_of_votes']) ?: 1;
+            @endphp
             @forelse($votes as $v)
             <x-table.row wire:loading.class.delay="opacity-75" wire:key="row-{{ $v['id'] }}">
                 <x-table.cell>{{ $v['id'] }}</x-table.cell>
-                <x-table.cell>{{ $v['vote_text'] }}</x-table.cell>
+                <x-table.cell class="space-y-2">
+                    <div>{{ $v['vote_text'] }}</div>
+                    <div id="bar-id-{{ $v['id'] }}">
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                createSVGBar('{{ $v['id'] }}', {{ $v['number_of_votes'] }}, {{ $sum_of_votes }});
+                            });
+                        </script>
+                    </div>
+                </x-table.cell>
                 <x-table.cell>{{ $v['number_of_votes'] }}</x-table.cell>
                 <x-table.cell>
                     <button type="button" wire:click="vote({{ $v['id'] }})" class="px-3 py-3 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md">
@@ -138,5 +150,28 @@
             </x-danger-button>
         </x-slot>
     </x-dialog-modal>
+
+    @push('scripts')
+        <script>
+            function createSVGBar(id, numberOfVotes, sumOfVotes) {
+                let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '10');
+
+                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', '0');
+                rect.setAttribute('y', '0');
+                rect.setAttribute('width', '0');
+                rect.setAttribute('height', '10');
+                rect.setAttribute('fill', 'lightblue');
+                svg.appendChild(rect);
+
+                document.getElementById('bar-id-' + id).appendChild(svg);
+
+                const width = (numberOfVotes / sumOfVotes) * 100;
+                rect.setAttribute('width', width + '%');
+            }
+        </script>
+    @endpush
 
 </div>

@@ -24,7 +24,7 @@
                 <x-table.cell>
                     <a href="/questions/{{ $q['id'] }}/votes">
                         {{ $q['question_text'] }}
-                    </a>
+                    </a>      
                 </x-table.cell>
                 <x-table.cell>{{ $q['number_of_votes'] }}</x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">

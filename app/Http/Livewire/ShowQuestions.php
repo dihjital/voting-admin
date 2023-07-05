@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire;
 
-use App\Http\Livewire\Traits\WithLogin;
+use App\Http\Livewire\Traits\WithOAuthLogin;
 use App\Http\Livewire\Traits\WithPerPagePagination;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
@@ -13,7 +13,10 @@ use Livewire\Component;
 class ShowQuestions extends Component
 {
 
-    use InteractsWithBanner, WithPerPagePagination, WithLogin;
+    use InteractsWithBanner, WithPerPagePagination, WithOAuthLogin;
+
+    public $access_token;
+    public $refresh_token;
 
     public $error_message;
 
@@ -33,7 +36,11 @@ class ShowQuestions extends Component
 
     public function mount()
     {
-        list($this->access_token, $this->refresh_token) = $this->login();
+        try {
+            list($this->access_token, $this->refresh_token) = $this->login();
+        } catch (\Exception $e) {
+            $this->error_message = $e->getMessage();
+        }
     }
 
     public static function getURL(): string

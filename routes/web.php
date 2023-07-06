@@ -2,6 +2,7 @@
 
 use App\Http\Livewire\ShowQuestions;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,12 @@ Route::middleware([
     'verified'
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $result = Http::get(env('API_ENDPOINT').'/summary');
+        return $result->ok()
+            ? view('dashboard', [
+                'results' => (object) $result->json()
+            ])
+            : view('dashboard');
     })->name('dashboard');
     Route::get('/questions', function () {
         return view('list-all-questions');

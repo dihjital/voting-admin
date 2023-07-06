@@ -30,7 +30,7 @@
                 <x-table.cell>{{ $v['id'] }}</x-table.cell>
                 <x-table.cell class="space-y-2">
                     <div>{{ $v['vote_text'] }}</div>
-                    <div id="bar-id-{{ $v['id'] }}">
+                    <div wire:ignore id="bar-id-{{ $v['id'] }}">
                         <script>
                             document.addEventListener("DOMContentLoaded", function() {
                                 createSVGBar('{{ $v['id'] }}', {{ $v['number_of_votes'] }}, {{ $sum_of_votes }});
@@ -154,6 +154,8 @@
     @push('scripts')
         <script>
             function createSVGBar(id, numberOfVotes, sumOfVotes) {
+                if (!numberOfVotes) return false;
+                
                 let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svg.setAttribute('width', '100%');
                 svg.setAttribute('height', '10');
@@ -166,10 +168,20 @@
                 rect.setAttribute('fill', 'lightblue');
                 svg.appendChild(rect);
 
+                const width = (numberOfVotes / sumOfVotes) * 100;
+                const scale = 0.9; // scale the widh down so the label will fit
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', width * scale + 2 + '%');
+                label.setAttribute('y', '10');
+                label.setAttribute('fill', 'black');
+                label.style.fontSize = '12px';
+                label.textContent = width.toFixed(1) + '%';
+                svg.appendChild(label);
+
                 document.getElementById('bar-id-' + id).appendChild(svg);
 
-                const width = (numberOfVotes / sumOfVotes) * 100;
-                rect.setAttribute('width', width + '%');
+                rect.setAttribute('width', width * scale + '%');
             }
         </script>
     @endpush

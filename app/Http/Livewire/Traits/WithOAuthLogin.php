@@ -25,7 +25,6 @@ trait WithOAuthLogin
 
     protected function checkHalfTime($issued_at, $expires_in): bool
     {
-        // dd($issued_at, $expires_in);
         if (empty($issued_at) || empty($expires_in))
             return true;
 
@@ -118,13 +117,11 @@ trait WithOAuthLogin
             return $tokens;
         }
 
-        // Retrieve tokens from cache. We might need to store them per user ... add to TODO
+        // TODO: Retrieve tokens from cache. We might need to store them per user ...
         $tokens = $this->getTokensFromCache();
         if (self::numberOfNonEmptyElements($tokens) === 4) {
             list($access_token, $refresh_token, $issued_at, $expires_in) = $tokens;
             // We are over half time so refresh tokens ...
-            // Now if we refresh our token why the new token is going to have 1 year again?
-            // Shall we set token expirity somehow ... ?
             if ($this->checkHalfTime($issued_at, $expires_in)) {
                 $tokens = $this->refreshToken($refresh_token);
                 if (self::numberOfNonEmptyElements($tokens) === 3) {

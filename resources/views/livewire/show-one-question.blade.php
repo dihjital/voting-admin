@@ -1,11 +1,13 @@
 <div class="w-full p-4">
 
+    @unless ($question_closed)
     <button type="button" wire:click="toggleCreateVoteModal"
            class="fixed z-100 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl hover:animate-bounce duration-300">
             <svg width="50" height="50" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
             </svg>
     </button>
+    @endif
 
     <div class="py-4 flex justify-center items-center">
         <h3 class="text-lg text-center font-medium text-gray-900 dark:text-gray-100">{{ $question_text }}</h3>
@@ -40,17 +42,19 @@
                 </x-table.cell>
                 <x-table.cell>{{ $v['number_of_votes'] }}</x-table.cell>
                 <x-table.cell>
-                    <button type="button" wire:click="vote({{ $v['id'] }})" class="px-3 py-3 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md">
+                    <button type="button" @if ($question_closed) disabled @endif wire:click="vote({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('vote', $question_closed) }} text-white text-xs rounded-md">
                         <i class="fas fa-plus fa-sm" aria-hidden="true" title="{{ __('Vote') }}"></i>
                     </button>
                 </x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">
-                    <button type="button" wire:click="toggleUpdateVoteModal({{ $v['id'] }})" class="px-3 py-3 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md">
-                        <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
-                    </button>
-                    <button type="button" wire:click="toggleDeleteVoteModal({{ $v['id'] }})" class="px-3 py-3 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md">
-                        <i class="fas fa-trash fa-sm" aria-hidden="true" title="{{ __('Delete') }}"></i>
-                    </button>
+                    <div class="flex space-x-2">
+                        <button type="button" @if ($question_closed) disabled @endif wire:click="toggleUpdateVoteModal({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', $question_closed) }} text-white text-xs rounded-md">
+                            <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
+                        </button>
+                        <button type="button" @if ($question_closed) disabled @endif wire:click="toggleDeleteVoteModal({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('delete', $question_closed) }} text-white text-xs rounded-md">
+                            <i class="fas fa-trash fa-sm" aria-hidden="true" title="{{ __('Delete') }}"></i>
+                        </button>
+                    </div>
                 </x-table.cell>
             </x-table.row>
             @empty

@@ -53,6 +53,40 @@ class ShowQuestions extends Component
         return self::PAGINATING;
     }
 
+    public function closedColor($button = 'modify', $is_closed = 0)
+    {
+        return [
+            'modify' => [
+                '0' => 'bg-blue-500 hover:bg-blue-600',
+                '1' => 'bg-gray-500 hover:bg-gray-600',
+            ],
+            'delete' => [
+                '0' => 'bg-red-500 hover:bg-red-600',
+                '1' => 'bg-gray-500 hover:bg-gray-600',
+            ],
+        ][$button][$is_closed];
+    }
+
+    public function openQuestion($question_id, $is_closed)
+    {
+        // Open or close the selected Question ...
+        try {
+            $response = Http::withToken($this->access_token)
+                ->patch(self::getURL().'/questions/'.$question_id, [
+                    'is_closed' => ! $is_closed,
+            ]);
+
+            if ($response->status() !== 200) {
+                throw new \Exception("Return HTTP status code is not 200!");
+            }
+
+            $this->banner(__('Question successfully updated'));
+            $this->emit('confirming-question-text-update');
+        } catch (\Exception $e) {
+            $this->error_message = $e->getMessage();
+        }
+    }
+
     public function toggleCreateQuestionModal()
     {
         $this->resetErrorBag();

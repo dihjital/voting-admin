@@ -15,8 +15,10 @@ class ShowOneQuestion extends Component
     public $access_token;
     public $refresh_token;
 
-    public $question_text;
     public $question_id;
+    public $question_text;
+    public $question_closed = false;
+
     public $votes;
     public $vote_id;
     public $vote_text;
@@ -50,6 +52,24 @@ class ShowOneQuestion extends Component
         return env('API_ENDPOINT', self::URL);
     }
 
+    public function closedColor($button = 'modify', $is_closed = 0)
+    {
+        return [
+            'modify' => [
+                '0' => 'bg-blue-500 hover:bg-blue-600',
+                '1' => 'bg-gray-500 hover:bg-gray-600',
+            ],
+            'vote' => [
+                '0' => 'bg-blue-500 hover:bg-blue-600',
+                '1' => 'bg-gray-500 hover:bg-gray-600',
+            ],
+            'delete' => [
+                '0' => 'bg-red-500 hover:bg-red-600',
+                '1' => 'bg-gray-500 hover:bg-gray-600',
+            ],
+        ][$button][$is_closed];
+    }
+
     public function fetchData()
     {
         try {
@@ -57,9 +77,11 @@ class ShowOneQuestion extends Component
             $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes');
             $this->votes = $response->json();
 
-            // Get the question text ..
+            // Get the question text and whether it is open for any modification ...
+            // TODO: Check for any HTTP Error Codes here ...
             $response = Http::get(self::getURL().'/questions/'.$this->question_id);
             $this->question_text = $response->json()['question_text'];
+            $this->question_closed = $response->json()['is_closed'];
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
         }

@@ -32,6 +32,7 @@ class ShowQuestions extends Component
 
     protected $rules = [
         'question_text' => 'required|min:6',
+        // 'is_closed' => 'nullable|boolean', Should add a property as well to the model
     ];
 
     public function mount()
@@ -74,11 +75,12 @@ class ShowQuestions extends Component
             $response = Http::withToken($this->access_token)
                 ->patch(self::getURL().'/questions/'.$question_id, [
                     'is_closed' => ! $is_closed,
-            ]);
+                ])
+                ->throwUnlessStatus(200);
 
-            if ($response->status() !== 200) {
-                throw new \Exception("Return HTTP status code is not 200!");
-            }
+            /* if ($response->status() !== 200) {
+                throw new \Exception(__('Returned HTTP status code is not 200!'));
+            } */
 
             $this->banner(__('Question successfully updated'));
             $this->emit('confirming-question-text-update');
@@ -112,7 +114,8 @@ class ShowQuestions extends Component
         
         try {
             // Get the selected question text...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id);
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id)
+                ->throwUnlessStatus(200);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
@@ -132,11 +135,12 @@ class ShowQuestions extends Component
             $response = Http::withToken($this->access_token)
                 ->post(self::getURL().'/questions', [
                     'question_text' => $this->question_text,
-                ]);
+                ])
+                ->throwUnlessStatus(201);
 
-            if (!in_array($response->status(), [200, 201])) {
+            /* if (!in_array($response->status(), [200, 201])) {
                 throw new \Exception("Return HTTP status code is not ".implode(' or ', [200, 201]));
-            }
+            } */
 
             $this->banner(__('Question successfully created'));
             $this->emit('confirming-question-create');
@@ -162,11 +166,12 @@ class ShowQuestions extends Component
             $response = Http::withToken($this->access_token)
                 ->put(self::getURL().'/questions/'.$this->question_id, [
                     'question_text' => $this->question_text,
-                ]);
+                ])
+                ->throwUnlessStatus(200);
 
-            if ($response->status() !== 200) {
-                throw new \Exception("Return HTTP status code is not 200!");
-            }
+            /* if ($response->status() !== 200) {
+                throw new \Exception(__('Returned HTTP status code is not 200!'));
+            } */
 
             $this->banner(__('Question successfully updated'));
             $this->emit('confirming-question-text-update');
@@ -188,11 +193,12 @@ class ShowQuestions extends Component
         try {
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->delete(self::getURL().'/questions/'.$this->question_id);
+                ->delete(self::getURL().'/questions/'.$this->question_id)
+                ->throwUnlessStatus(200);
 
-            if ($response->status() !== 200) {
-                throw new \Exception("Return HTTP status code is not 200!");
-            }
+            /*   if ($response->status() !== 200) {
+                throw new \Exception(__('Returned HTTP status code is not 200!'));
+            } */
 
             $this->banner(__('Question successfully deleted'));
         } catch (\Exception $e) {

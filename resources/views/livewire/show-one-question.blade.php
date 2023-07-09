@@ -6,7 +6,9 @@
 
         init() {
             const createVoteBarCharts = () => {
-                const sumOfVotes = this.voteResults.map(item => item['number_of_votes']).reduce((a, b) => a + b);
+                const sumOfVotes = this.voteResults.length > 0
+                    ? this.voteResults.map(item => item['number_of_votes']).reduce((a, b) => a + b)
+                    : undefined;
 
                 this.voteResults.forEach(item => {
                     createSVGBar(item['id'], item['number_of_votes'], sumOfVotes);

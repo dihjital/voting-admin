@@ -74,12 +74,13 @@ class ShowOneQuestion extends Component
     {
         try {
             // Get the votes ...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes');
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes')
+                ->throwUnlessStatus(200);
             $this->votes = $response->json();
 
             // Get the question text and whether it is open for any modification ...
-            // TODO: Check for any HTTP Error Codes here ...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id);
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id)
+                ->throwUnlessStatus(200);
             $this->question_text = $response->json()['question_text'];
             $this->question_closed = $response->json()['is_closed'] ?? false;
             // Inform the page that new data has been fetched
@@ -91,8 +92,8 @@ class ShowOneQuestion extends Component
 
     public function toggleDeleteVoteModal($vote_id)
     {
-        // trigger modal and set the $vote_id
-        $this->confirm_delete = !$this->confirm_delete;
+        // Trigger modal and set the $vote_id
+        $this->confirm_delete = ! $this->confirm_delete;
         $this->vote_id = $vote_id;
     }
 
@@ -106,7 +107,8 @@ class ShowOneQuestion extends Component
         
         try {
             // Get the selected vote text...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
+            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+                ->throwUnlessStatus(200);
             $this->vote_text = $response->json()['vote_text'];
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
@@ -119,18 +121,15 @@ class ShowOneQuestion extends Component
         $this->resetValidation();
 
         $this->vote_text = '';
-        $this->new_vote = !$this->new_vote;
+        $this->new_vote = ! $this->new_vote;
     }
 
     public function vote($vote_id)
     {
         try {
             // Vote ...
-            $response = Http::patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
-
-            if ($response->status() !== 200) {
-                throw new \Exception(__("Error occured during voting!"));
-            }
+            $response = Http::patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+                ->throwUnlessStatus(200);
 
             $this->banner(__('Successful vote'));
         } catch (\Exception $e) {
@@ -152,11 +151,8 @@ class ShowOneQuestion extends Component
                 ->post(self::getURL().'/questions/'.$this->question_id.'/votes', [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
-                ]);
-
-            if (!in_array($response->status(), [200, 201])) {
-                throw new \Exception("Return HTTP status code is not ".implode(' or ', [200, 201]));
-            }
+                ])
+                ->throwUnlessStatus(201);
 
             $this->banner(__('Vote successfully created'));
             $this->emit('confirming-vote-create');
@@ -164,7 +160,7 @@ class ShowOneQuestion extends Component
             $this->error_message = $e->getMessage();
         }
 
-        $this->new_vote = !$this->new_vote;
+        $this->new_vote = ! $this->new_vote;
     }
 
     public function update($vote_id)
@@ -183,11 +179,8 @@ class ShowOneQuestion extends Component
                 ->put(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id, [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
-                ]);
-
-            if ($response->status() !== 200) {
-                throw new \Exception(__("Error occured during update!"));
-            }
+                ])
+                ->throwUnlessStatus(200);
 
             $this->banner(__('Vote successfully updated'));
             $this->emit('confirming-vote-text-update');
@@ -195,7 +188,7 @@ class ShowOneQuestion extends Component
             $this->error_message = $e->getMessage();
         }
 
-        $this->update_vote = !$this->update_vote;
+        $this->update_vote = ! $this->update_vote;
     }
 
     public function delete($vote_id) 
@@ -209,11 +202,8 @@ class ShowOneQuestion extends Component
         try {
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
-
-            if ($response->status() !== 200) {
-                throw new \Exception(__("Error occured during delete!"));
-            }
+                ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+                ->throwUnlessStatus(200);
 
             $this->banner(__('Vote successfully deleted'));
         } catch (\Exception $e) {

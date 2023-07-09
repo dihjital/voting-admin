@@ -56,11 +56,11 @@ class ShowOneQuestion extends Component
     {
         return [
             'modify' => [
-                '0' => 'bg-blue-400 hover:bg-blue-500',
+                '0' => 'bg-indigo-500 hover:bg-indigo-600',
                 '1' => 'bg-gray-500 hover:bg-gray-600',
             ],
             'vote' => [
-                '0' => 'bg-blue-400 hover:bg-blue-500',
+                '0' => 'bg-indigo-500 hover:bg-indigo-600',
                 '1' => 'bg-gray-500 hover:bg-gray-600',
             ],
             'delete' => [

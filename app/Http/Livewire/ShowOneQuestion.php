@@ -81,7 +81,9 @@ class ShowOneQuestion extends Component
             // TODO: Check for any HTTP Error Codes here ...
             $response = Http::get(self::getURL().'/questions/'.$this->question_id);
             $this->question_text = $response->json()['question_text'];
-            $this->question_closed = $response->json()['is_closed'];
+            $this->question_closed = $response->json()['is_closed'] ?? false;
+            // Inform the page that new data has been fetched
+            $this->emit('data-fetched');
         } catch (\Exception $e) {
             $this->error_message = $e->getMessage();
         }

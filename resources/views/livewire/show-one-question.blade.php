@@ -1,4 +1,27 @@
-<div class="w-full p-4">
+<div class="w-full p-4"
+
+    x-data="{
+
+        voteResults: @entangle('votes'),
+
+        init() {
+            const createVoteBarCharts = () => {
+                const sumOfVotes = this.voteResults.map(item => item['number_of_votes']).reduce((a, b) => a + b);
+
+                this.voteResults.forEach(item => {
+                    createSVGBar(item['id'], item['number_of_votes'], sumOfVotes);
+                });
+            };
+
+            createVoteBarCharts();
+
+            Livewire.on('data-fetched', () => {
+                createVoteBarCharts();
+            });
+        }
+    }"
+
+>
 
     @unless ($question_closed)
     <button type="button" wire:click="toggleCreateVoteModal"
@@ -32,12 +55,7 @@
                 <x-table.cell>{{ $v['id'] }}</x-table.cell>
                 <x-table.cell class="space-y-2">
                     <div>{{ $v['vote_text'] }}</div>
-                    <div wire:ignore id="bar-id-{{ $v['id'] }}">
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function() {
-                                createSVGBar('{{ $v['id'] }}', {{ $v['number_of_votes'] }}, {{ $sum_of_votes }});
-                            });
-                        </script>
+                    <div wire:key="bar-id-{{ $v['id'] }}" id="bar-id-{{ $v['id'] }}">
                     </div>
                 </x-table.cell>
                 <x-table.cell>{{ $v['number_of_votes'] }}</x-table.cell>

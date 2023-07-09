@@ -52,7 +52,7 @@ class ShowOneQuestion extends Component
         return env('API_ENDPOINT', self::URL);
     }
 
-    public function closedColor($button = 'modify', $is_closed = 0)
+    public function closedColor($button = 'modify')
     {
         return [
             'modify' => [
@@ -67,7 +67,7 @@ class ShowOneQuestion extends Component
                 '0' => 'bg-red-500 hover:bg-red-600',
                 '1' => 'bg-gray-500 hover:bg-gray-600',
             ],
-        ][$button][$is_closed];
+        ][$button][$this->question_closed ?? 0];
     }
 
     public function fetchData()
@@ -129,7 +129,7 @@ class ShowOneQuestion extends Component
             $response = Http::patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
 
             if ($response->status() !== 200) {
-                throw new \Exception("Return HTTP status code is not 200!");
+                throw new \Exception(__("Error occured during voting!"));
             }
 
             $this->banner(__('Successful vote'));
@@ -186,7 +186,7 @@ class ShowOneQuestion extends Component
                 ]);
 
             if ($response->status() !== 200) {
-                throw new \Exception("Return HTTP status code is not 200!");
+                throw new \Exception(__("Error occured during update!"));
             }
 
             $this->banner(__('Vote successfully updated'));
@@ -212,7 +212,7 @@ class ShowOneQuestion extends Component
                 ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id);
 
             if ($response->status() !== 200) {
-                throw new \Exception("Return HTTP status code is not 200!");
+                throw new \Exception(__("Error occured during delete!"));
             }
 
             $this->banner(__('Vote successfully deleted'));

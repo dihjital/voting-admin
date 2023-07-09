@@ -60,16 +60,16 @@
                 </x-table.cell>
                 <x-table.cell>{{ $v['number_of_votes'] }}</x-table.cell>
                 <x-table.cell>
-                    <button type="button" @if ($question_closed) disabled @endif wire:click="vote({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('vote', $question_closed) }} text-white text-xs rounded-md">
+                    <button type="button" @if ($question_closed) disabled @endif wire:click="vote({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('vote') }} text-white text-xs rounded-md">
                         <i class="fas fa-plus fa-sm" aria-hidden="true" title="{{ __('Vote') }}"></i>
                     </button>
                 </x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">
                     <div class="flex space-x-2">
-                        <button type="button" @if ($question_closed) disabled @endif wire:click="toggleUpdateVoteModal({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', $question_closed) }} text-white text-xs rounded-md">
+                        <button type="button" @if ($question_closed) disabled @endif wire:click="toggleUpdateVoteModal({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify') }} text-white text-xs rounded-md">
                             <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
                         </button>
-                        <button type="button" @if ($question_closed) disabled @endif wire:click="toggleDeleteVoteModal({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('delete', $question_closed) }} text-white text-xs rounded-md">
+                        <button type="button" @if ($question_closed) disabled @endif wire:click="toggleDeleteVoteModal({{ $v['id'] }})" class="px-3 py-3 {{ $this->closedColor('delete') }} text-white text-xs rounded-md">
                             <i class="fas fa-trash fa-sm" aria-hidden="true" title="{{ __('Delete') }}"></i>
                         </button>
                     </div>

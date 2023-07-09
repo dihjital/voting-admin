@@ -117,7 +117,7 @@ trait WithOAuthLogin
             return $tokens;
         }
 
-        // TODO: Retrieve tokens from cache. We might need to store them per user ...
+        // TODO: We might need to store the tokens in the cache per user ...
         $tokens = $this->getTokensFromCache();
         if (self::numberOfNonEmptyElements($tokens) === 4) {
             list($access_token, $refresh_token, $issued_at, $expires_in) = $tokens;

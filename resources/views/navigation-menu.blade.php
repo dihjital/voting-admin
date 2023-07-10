@@ -74,6 +74,22 @@
                     </div>
                 @endif
 
+                <div x-data="{
+                        toggle: () => {
+                            if (darkMode === 'light') {
+                                darkMode = 'dark';
+                            } else {
+                                darkMode = 'light';
+                            }
+                        }
+                    }">
+                    <button x-on:click="toggle" title="{{ __('Switch to dark theme') }}">
+                        <i x-bind:style="darkMode === 'dark' ? 'color: white;' : 'color: black;'" 
+                           :class="darkMode === 'dark' ? 'fa-moon' : 'fa-circle-half-stroke'" 
+                           class="fa-solid"></i>
+                    </button>
+                </div>
+
                 <!-- Settings Dropdown -->
                 <div class="ml-3 relative">
                     <x-dropdown align="right" width="48">

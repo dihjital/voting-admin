@@ -32,10 +32,10 @@
                 <x-table.cell>{{ $q['number_of_votes'] }}</x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">
                     <div class="flex space-x-2">
-                        <button type="button" @if ($q['is_closed']) disabled @endif wire:click="toggleUpdateQuestionModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', $q['is_closed']) }} text-white text-xs rounded-md">
+                        <button type="button" @disabled($q['is_closed']) wire:click="toggleUpdateQuestionModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', $q['is_closed']) }} text-white text-xs rounded-md">
                             <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
                         </button>
-                        <button type="button" @if ($q['is_closed']) disabled @endif wire:click="toggleDeleteQuestionModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('delete', $q['is_closed']) }} text-white text-xs rounded-md">
+                        <button type="button" @disabled($q['is_closed']) wire:click="toggleDeleteQuestionModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('delete', $q['is_closed']) }} text-white text-xs rounded-md">
                             <i class="fas fa-trash fa-sm" aria-hidden="true" title="{{ __('Delete') }}"></i>
                         </button>
                     </div>
@@ -54,7 +54,7 @@
     </x-table>
 
     <div class="mt-4">
-        @if(App\Http\Livewire\ShowQuestions::PAGINATING)
+        @if(self::PAGINATING)
             {{ $questions->links() }}
         @endif
     </div>

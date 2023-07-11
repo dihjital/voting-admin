@@ -74,6 +74,7 @@
                     </div>
                 @endif
 
+                <!-- Color theme selector //-->
                 <div x-data="{
                         toggle: () => {
                             if (darkMode === 'light') {

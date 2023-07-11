@@ -183,7 +183,7 @@
                 rect.setAttribute('ry', '4');
                 rect.setAttribute('width', '0');
                 rect.setAttribute('height', '10');
-                rect.setAttribute('fill', 'lightblue');
+                rect.setAttribute('class', 'fill-current text-blue-200 dark:text-gray-200');
                 svg.appendChild(rect);
 
                 const width = (numberOfVotes / sumOfVotes) * 100;
@@ -192,7 +192,8 @@
                 const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 label.setAttribute('x', width * scale + 2 + '%');
                 label.setAttribute('y', '10');
-                label.setAttribute('fill', 'black');
+                label.setAttribute('fill', localStorage.getItem('darkMode') === "dark" ? 'lightgray' : 'black');
+                label.setAttribute('class', 'fill-current text-gray-500 dark:text-gray-400');
                 label.style.fontSize = '12px';
                 label.textContent = width.toFixed(1) + '%';
                 svg.appendChild(label);

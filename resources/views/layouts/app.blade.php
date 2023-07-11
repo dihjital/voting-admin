@@ -20,6 +20,18 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script>
+            // It's best to inline this in `head` to avoid FOUC (flash of unstyled content) when changing pages or themes
+            if (
+              localStorage.getItem('darkMode') === 'dark' ||
+              (!('darkMode' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+            ) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          </script>
 
         <!-- Styles -->
         @livewireStyles

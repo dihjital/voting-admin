@@ -3,8 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Http;
+
+use App\Http\HttpClientMixin;
 
 class AppServiceProvider extends ServiceProvider
 {

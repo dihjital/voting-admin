@@ -2,15 +2,19 @@
 
 namespace App\Http\Livewire;
 
-use App\Http\Livewire\Traits\WithOAuthLogin;
-use Livewire\Component;
 use Illuminate\Support\Facades\Http;
 use Laravel\Jetstream\InteractsWithBanner;
+
+use Livewire\Component;
+
+use App\Http\Livewire\Traits\WithErrorMessage;
+use App\Http\Livewire\Traits\WithOAuthLogin;
+use App\Http\Livewire\Traits\WithUUIDSession;
 
 class ShowOneQuestion extends Component
 {
 
-    use InteractsWithBanner, WithOAuthLogin;
+    use InteractsWithBanner, WithErrorMessage, WithOAuthLogin, WithUUIDSession;
 
     public $access_token;
     public $refresh_token;
@@ -22,8 +26,6 @@ class ShowOneQuestion extends Component
     public $votes;
     public $vote_id;
     public $vote_text;
-
-    public $error_message;
 
     // Modal controllers
     public $confirm_delete = false;
@@ -42,8 +44,11 @@ class ShowOneQuestion extends Component
 
         try {
             list($this->access_token, $this->refresh_token) = $this->login();
+
+            // Send over the current user uuid and get a session id back
+            $this->registerUUIDInSession($this->access_token);
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -74,19 +79,28 @@ class ShowOneQuestion extends Component
     {
         try {
             // Get the votes ...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes')
+            $response = Http::withHeaders([
+                    'session-id' => $this->session_id
+                ])
+                ->get(self::getURL().'/questions/'.$this->question_id.'/votes')
                 ->throwUnlessStatus(200);
+
             $this->votes = $response->json();
 
             // Get the question text and whether it is open for any modification ...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id)
+            $response = Http::withHeaders([
+                    'session-id' => $this->session_id
+                ])
+                ->get(self::getURL().'/questions/'.$this->question_id)
                 ->throwUnlessStatus(200);
+            
             $this->question_text = $response->json()['question_text'];
             $this->question_closed = $response->json()['is_closed'] ?? false;
+            
             // Inform the page that new data has been fetched
             $this->emit('data-fetched');
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -111,7 +125,7 @@ class ShowOneQuestion extends Component
                 ->throwUnlessStatus(200);
             $this->vote_text = $response->json()['vote_text'];
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -133,7 +147,7 @@ class ShowOneQuestion extends Component
 
             $this->banner(__('Successful vote'));
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -141,13 +155,12 @@ class ShowOneQuestion extends Component
     {
         $this->validate();
 
-        if (!$this->access_token) {
-            list($this->access_token, $this->refresh_token) = $this->login();
-        }
-
         try {
             // Create a new vote ...
             $response = Http::withToken($this->access_token)
+                ->withHeaders([
+                    'session_id' => $this->session_id,
+                ])
                 ->post(self::getURL().'/questions/'.$this->question_id.'/votes', [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
@@ -157,7 +170,7 @@ class ShowOneQuestion extends Component
             $this->banner(__('Vote successfully created'));
             $this->emit('confirming-vote-create');
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
         $this->new_vote = ! $this->new_vote;
@@ -169,13 +182,12 @@ class ShowOneQuestion extends Component
 
         $this->validate();
 
-        if (!$this->access_token) {
-            list($this->access_token, $this->refresh_token) = $this->login();
-        }
-
         try {
             // Update the selected vote ...
             $response = Http::withToken($this->access_token)
+                ->withHeaders([
+                    'session_id' => $this->session_id,
+                ])
                 ->put(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id, [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
@@ -185,7 +197,7 @@ class ShowOneQuestion extends Component
             $this->banner(__('Vote successfully updated'));
             $this->emit('confirming-vote-text-update');
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
         $this->update_vote = ! $this->update_vote;
@@ -195,19 +207,18 @@ class ShowOneQuestion extends Component
     {
         $vote_id ??= $this->vote_id;
 
-        if (!$this->access_token) {
-            list($this->access_token, $this->refresh_token) = $this->login();
-        }
-
         try {
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
+                ->withHeaders([
+                    'session_id' => $this->session_id,
+                ])
                 ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Vote successfully deleted'));
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
         $this->confirm_delete = !$this->confirm_delete;

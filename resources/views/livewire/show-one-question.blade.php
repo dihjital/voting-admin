@@ -32,8 +32,8 @@
     <div class="py-4 flex justify-center items-center">
         <h3 class="text-lg text-center font-medium text-gray-900 dark:text-gray-100">{{ $question_text }}</h3>
     </div>
-    @if($error_message)
-        <p class="text-lg text-center font-medium text-red-500">{{ $error_message }}</p>
+    @if($this->hasErrorMessage())
+        <x-error-page code="{{ $this->getStatusCode() }}" message="{{ $this->getErrorMessage() }}"></x-error-page>
     @else
     <x-table>
         <x-slot name="head">

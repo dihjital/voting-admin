@@ -2,8 +2,11 @@
 
 namespace App\Http\Livewire;
 
+use App\Http\Livewire\Traits\WithErrorMessage;
 use App\Http\Livewire\Traits\WithOAuthLogin;
 use App\Http\Livewire\Traits\WithPerPagePagination;
+use App\Http\Livewire\Traits\WithUUIDSession;
+
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
 use Laravel\Jetstream\InteractsWithBanner;
@@ -12,8 +15,7 @@ use Livewire\Component;
 
 class ShowQuestions extends Component
 {
-
-    use InteractsWithBanner, WithPerPagePagination, WithOAuthLogin;
+    use InteractsWithBanner, WithErrorMessage, WithPerPagePagination, WithOAuthLogin, WithUUIDSession;
 
     public $access_token;
     public $refresh_token;
@@ -38,9 +40,13 @@ class ShowQuestions extends Component
     public function mount()
     {
         try {
+            // OAuth login process
             list($this->access_token, $this->refresh_token) = $this->login();
+
+            // Send over the current user uuid and get a session id back
+            $this->registerUUIDInSession($this->access_token);
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -51,7 +57,7 @@ class ShowQuestions extends Component
 
     public static function getPAGINATING(): bool
     {
-        return self::PAGINATING;
+        return env('PAGINATING', self::PAGINATING);
     }
 
     public function closedColor($button = 'modify', $is_closed = 0)
@@ -73,19 +79,16 @@ class ShowQuestions extends Component
         // Open or close the selected Question ...
         try {
             $response = Http::withToken($this->access_token)
-                ->patch(self::getURL().'/questions/'.$question_id, [
+                ->withHeaders([
+                    'session-id' => $this->session_id
+                ])->patch(self::getURL().'/questions/'.$question_id, [
                     'is_closed' => ! $is_closed,
-                ])
-                ->throwUnlessStatus(200);
-
-            /* if ($response->status() !== 200) {
-                throw new \Exception(__('Returned HTTP status code is not 200!'));
-            } */
+                ])->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully updated'));
             $this->emit('confirming-question-text-update');
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -118,7 +121,7 @@ class ShowQuestions extends Component
                 ->throwUnlessStatus(200);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
 
@@ -126,26 +129,19 @@ class ShowQuestions extends Component
     {
         $this->validate();
 
-        if (!$this->access_token) {
-            list($this->access_token, $this->refresh_token) = $this->login();
-        }
-
         try {
-            // Create a new vote ...
+            // Create a new question ...
             $response = Http::withToken($this->access_token)
-                ->post(self::getURL().'/questions', [
+                ->withHeaders([
+                    'session-id' => $this->session_id
+                ])->post(self::getURL().'/questions', [
                     'question_text' => $this->question_text,
-                ])
-                ->throwUnlessStatus(201);
-
-            /* if (!in_array($response->status(), [200, 201])) {
-                throw new \Exception("Return HTTP status code is not ".implode(' or ', [200, 201]));
-            } */
+                ])->throwUnlessStatus(201);
 
             $this->banner(__('Question successfully created'));
             $this->emit('confirming-question-create');
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
         $this->new_question = !$this->new_question;
@@ -157,26 +153,19 @@ class ShowQuestions extends Component
 
         $this->validate();
 
-        if (!$this->access_token) {
-            list($this->access_token, $this->refresh_token) = $this->login();
-        }
-
         try {
             // Update the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->put(self::getURL().'/questions/'.$this->question_id, [
+                ->withHeaders([
+                    'session-id' => $this->session_id
+                ])->put(self::getURL().'/questions/'.$this->question_id, [
                     'question_text' => $this->question_text,
-                ])
-                ->throwUnlessStatus(200);
-
-            /* if ($response->status() !== 200) {
-                throw new \Exception(__('Returned HTTP status code is not 200!'));
-            } */
+                ])->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully updated'));
             $this->emit('confirming-question-text-update');
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
         $this->update_question = !$this->update_question;
@@ -184,25 +173,21 @@ class ShowQuestions extends Component
 
     public function delete($question_id)
     {
+        // TODO: If Paginating is enabled then deleting the last record on the page
+        // should move to the previous page. Now it stays on the empty page instead.
         $question_id ??= $this->question_id;
-
-        if (!$this->access_token) {
-            list($this->access_token, $this->refresh_token) = $this->login();
-        }
 
         try {
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
-                ->delete(self::getURL().'/questions/'.$this->question_id)
+                ->withHeaders([
+                    'session-id' => $this->session_id
+                ])->delete(self::getURL().'/questions/'.$this->question_id)
                 ->throwUnlessStatus(200);
-
-            /*   if ($response->status() !== 200) {
-                throw new \Exception(__('Returned HTTP status code is not 200!'));
-            } */
 
             $this->banner(__('Question successfully deleted'));
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
         $this->confirm_delete = !$this->confirm_delete;
@@ -213,15 +198,19 @@ class ShowQuestions extends Component
         try {
             $url = self::getURL().'/questions';
             
-            if (self::PAGINATING) {
+            if (self::getPAGINATING()) {
                 $currentPage = $page ?? request('page', 1);
                 $url .= '?page='.$currentPage;
             }
             
-            $response = Http::get($url)->throwUnlessStatus(200);
+            $response = Http::withHeaders([
+                'session-id' => $this->session_id
+                ])->get($url)
+                ->throwUnlessStatus(200);
+
             $data = $response->json();
             
-            $paginator = self::PAGINATING
+            return self::getPAGINATING()
                 ? new LengthAwarePaginator(
                     collect($data['data']),
                     $data['total'],
@@ -230,10 +219,8 @@ class ShowQuestions extends Component
                     ['path' => url('/questions')]
                 )
                 : $data;
-                
-            return $paginator;
         } catch (\Exception $e) {
-            $this->error_message = $e->getMessage();
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
         } 
     }
 

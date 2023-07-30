@@ -2,8 +2,8 @@
 
     <x-new-button wire:click="toggleCreateQuestionModal"></x-new-button>
 
-    @if($error_message)
-        <p class="text-lg text-center font-medium text-red-500">{{ $error_message }}</p>
+    @if($this->hasErrorMessage())
+        <x-error-page code="{{ $this->getStatusCode() }}" message="{{ $this->getErrorMessage() }}"></x-error-page>
     @else
     <x-table>
         <x-slot name="head">

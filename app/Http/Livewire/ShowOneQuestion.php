@@ -13,7 +13,6 @@ use App\Http\Livewire\Traits\WithUUIDSession;
 
 class ShowOneQuestion extends Component
 {
-
     use InteractsWithBanner, WithErrorMessage, WithOAuthLogin, WithUUIDSession;
 
     public $access_token;
@@ -159,7 +158,7 @@ class ShowOneQuestion extends Component
             // Create a new vote ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
-                    'session_id' => $this->session_id,
+                    'session-id' => $this->session_id,
                 ])
                 ->post(self::getURL().'/questions/'.$this->question_id.'/votes', [
                     'vote_text' => $this->vote_text,
@@ -186,7 +185,7 @@ class ShowOneQuestion extends Component
             // Update the selected vote ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
-                    'session_id' => $this->session_id,
+                    'session-id' => $this->session_id,
                 ])
                 ->put(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id, [
                     'vote_text' => $this->vote_text,
@@ -211,7 +210,7 @@ class ShowOneQuestion extends Component
             // Delete the selected vote ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
-                    'session_id' => $this->session_id,
+                    'session-id' => $this->session_id,
                 ])
                 ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);

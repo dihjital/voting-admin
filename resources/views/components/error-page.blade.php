@@ -1,6 +1,6 @@
 @props(['code', 'message'])
 
-<div class="flex h-[calc(50vh-80px)] mt-5 mb-5 items-center justify-center p-5 bg-white dark:bg-gray-600 overflow-auto sm:rounded-lg w-full">
+<div class="flex h-[calc(50vh-80px)] items-center justify-center p-5 bg-white dark:bg-gray-600 overflow-auto sm:rounded-lg w-full">
     <div class="text-center">
       <div class="inline-flex rounded-full bg-yellow-200 dark:bg-yellow-100 p-4">
         <div class="rounded-full stroke-yellow-800 dark:stroke-yellow-600 bg-yellow-400 dark:bg-yellow-200 p-4">

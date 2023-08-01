@@ -32,6 +32,9 @@
                 <x-table.cell>{{ $q['number_of_votes'] }}</x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">
                     <div class="flex space-x-2">
+                        <button type="button" @disabled($q['is_closed']) wire:click="toggleQRCodeModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', $q['is_closed']) }} text-white text-xs rounded-md">
+                            <i class="fas fa-qrcode fa-sm" aria-hidden="true" title="{{ __('QR Code') }}"></i>
+                        </button>
                         <button type="button" @disabled($q['is_closed']) wire:click="toggleUpdateQuestionModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', $q['is_closed']) }} text-white text-xs rounded-md">
                             <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
                         </button>
@@ -60,6 +63,27 @@
     </div>
 
     @endif
+
+    <!-- QR Code Modal -->
+    <x-dialog-modal wire:model="results_qrcode" maxWidth="md">
+        <x-slot name="title">
+            {{ __('QR Code for results') }}
+        </x-slot>
+
+        <x-slot name="content">
+            {{ __('With this QR Code you can monitor the results of your voting.') }}
+
+            <div class="mt-4 flex justify-center items-center">
+                <img src="data:image/png;base64, {{ $this->generateQrCode($question_id) }}" alt="QR Code for {{ $question_id }}">
+            </div>
+        </x-slot>
+
+        <x-slot name="footer">
+            <x-secondary-button wire:click="$toggle('results_qrcode')" wire:loading.attr="disabled">
+                {{ __('Close') }}
+            </x-secondary-button>
+        </x-slot>
+    </x-dialog-modal>
 
     <!-- Create New Question Modal -->
     <x-dialog-modal wire:model="new_question">
@@ -124,7 +148,6 @@
             </x-danger-button>
         </x-slot>
     </x-dialog-modal>
-
 
     <!-- Delete Question Confirmation Modal -->
     <x-dialog-modal wire:model="confirm_delete">

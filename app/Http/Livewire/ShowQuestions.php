@@ -2,14 +2,17 @@
 
 namespace App\Http\Livewire;
 
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 use App\Http\Livewire\Traits\WithErrorMessage;
 use App\Http\Livewire\Traits\WithOAuthLogin;
 use App\Http\Livewire\Traits\WithPerPagePagination;
 use App\Http\Livewire\Traits\WithUUIDSession;
 
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Jetstream\InteractsWithBanner;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 use Livewire\Component;
 
@@ -25,6 +28,7 @@ class ShowQuestions extends Component
     public $question_id;
     public $question_text;
 
+    public $results_qrcode = false;
     public $confirm_delete = false;
     public $update_question = false;
     public $new_question = false;
@@ -92,18 +96,34 @@ class ShowQuestions extends Component
         }
     }
 
+    public function generateQrCode($question_id)
+    {
+        $url = 'https://voting-results.votes365.org/questions/'.$question_id.'/votes?user_id='.Auth::id();
+
+        return base64_encode(QrCode::format('png')
+            ->size(256)
+            // ->color(255,255,255)->backgroundColor(0,0,0)
+            ->generate($url));
+    }
+
+    public function toggleQRCodeModal($question_id)
+    {
+        $this->results_qrcode = ! $this->results_qrcode;
+        $this->question_id = $question_id;
+    }
+
     public function toggleCreateQuestionModal()
     {
         $this->resetErrorBag();
         $this->resetValidation();
 
         $this->question_text = '';
-        $this->new_question = !$this->new_question;
+        $this->new_question = ! $this->new_question;
     }
 
     public function toggleDeleteQuestionModal($question_id)
     {
-        $this->confirm_delete = !$this->confirm_delete;
+        $this->confirm_delete = ! $this->confirm_delete;
         $this->question_id = $question_id;
     }
 
@@ -112,7 +132,7 @@ class ShowQuestions extends Component
         $this->resetErrorBag();
         $this->resetValidation();
 
-        $this->update_question = !$this->update_question;
+        $this->update_question = ! $this->update_question;
         $this->question_id = $question_id;
         
         try {

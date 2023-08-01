@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\QrCodeController;
 use App\Http\Livewire\ShowQuestions;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\Http;
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
+
+/* Route::get('/questions/{question_id}/votes/qrcode',
+  [QrCodeController::class, 'download']  
+); */
 
 Route::middleware([
     'auth:sanctum',

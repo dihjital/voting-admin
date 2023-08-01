@@ -16,7 +16,7 @@ trait WithUUIDSession
 
         $this->session_id = $this->isSessionIdExists()
             ? $this->getSessionId()
-            : $this->requestNewSessionId($access_token);
+            : $this->requestNewSessionId($access_token, request('user_id'));
     }
 
     protected function getSessionKey(): string
@@ -39,11 +39,11 @@ trait WithUUIDSession
         session()->put($this->session_key, $session_id);
     }
 
-    protected function requestNewSessionId($access_token)
+    protected function requestNewSessionId($access_token, $user_id = '')
     {
         $response = Http::withToken($access_token)
         ->post(self::getURL().'/session', [
-            'user_id' => Auth::id(),
+            'user_id' => $user_id ?: Auth::id(),
         ])->throwUnlessStatus(200);
 
         $this->storeSessionId($response->json()['session_id']);

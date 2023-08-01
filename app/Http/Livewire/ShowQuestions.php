@@ -87,6 +87,7 @@ class ShowQuestions extends Component
                     'session-id' => $this->session_id
                 ])->patch(self::getURL().'/questions/'.$question_id, [
                     'is_closed' => ! $is_closed,
+                    'user_id' => Auth::id(), // Until it is not mondatory at the back-end
                 ])->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully updated'));
@@ -98,7 +99,9 @@ class ShowQuestions extends Component
 
     public function generateQrCode($question_id)
     {
-        $url = 'https://voting-results.votes365.org/questions/'.$question_id.'/votes?user_id='.Auth::id();
+        // TODO: Move this to a separate method
+        $url = env('RESULTS_URL', 'https://voting-results.votes365.org');
+        $url = $url.'/'.$question_id.'/votes?user_id='.Auth::id();
 
         return base64_encode(QrCode::format('png')
             ->size(256)

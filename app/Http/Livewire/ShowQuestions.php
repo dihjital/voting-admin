@@ -101,7 +101,7 @@ class ShowQuestions extends Component
     {
         // TODO: Move this to a separate method
         $url = env('RESULTS_URL', 'https://voting-results.votes365.org');
-        $url = $url.'/'.$question_id.'/votes?user_id='.Auth::id();
+        $url = $url.'/questions/'.$question_id.'/votes?user_id='.Auth::id();
 
         return base64_encode(QrCode::format('png')
             ->size(256)

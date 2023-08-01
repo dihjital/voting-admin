@@ -101,7 +101,7 @@ class ShowQuestions extends Component
     {
         // TODO: Move this to a separate method
         $url = env('RESULTS_URL', 'https://voting-results.votes365.org');
-        $url = $url.'/questions/'.$question_id.'/votes?user_id='.Auth::id();
+        $url .= '/questions/'.$question_id.'/votes?user_id='.Auth::id();
 
         return base64_encode(QrCode::format('png')
             ->size(256)
@@ -221,14 +221,12 @@ class ShowQuestions extends Component
         try {
             $url = self::getURL().'/questions';
             
-            if (self::getPAGINATING()) {
-                $currentPage = $page ?? request('page', 1);
-                $url .= '?page='.$currentPage;
-            }
-            
             $response = Http::withHeaders([
                 'session-id' => $this->session_id
-                ])->get($url)
+                ])->get($url, array_filter([
+                    'page' => self::getPAGINATING() ? $page ?? request('page', 1) : '',
+                    'user_id' => Auth::id(), // Until this becomes mandatory at the back-end
+                ]))
                 ->throwUnlessStatus(200);
 
             $data = $response->json();

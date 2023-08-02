@@ -65,16 +65,21 @@
     @endif
 
     <!-- QR Code Modal -->
-    <x-dialog-modal wire:model="results_qrcode" maxWidth="md">
+    <x-dialog-modal wire:model="results_qrcode" maxWidth="lg">
         <x-slot name="title">
             {{ __('QR Code for results') }}
         </x-slot>
 
         <x-slot name="content">
-            {{ __('With this QR Code you can monitor the results of your voting.') }}
+            {{ __('With the QR Code on the left you can monitor the results of your voting. The QR Code on the right allows you to open the voting client with the relevant question.') }}
 
-            <div class="mt-4 flex justify-center items-center">
-                <img src="data:image/png;base64, {{ $this->generateQrCode($question_id) }}" alt="QR Code for {{ $question_id }}">
+            <div class="flex mt-4 justify-center items-center space-x-4">
+                <div class="w-1/2">
+                    <img src="data:image/png;base64, {{ $this->generateQrCode($question_id) }}" alt="QR Code for {{ $question_id }}">
+                </div>
+                <div class="w-1/2">
+                    <img src="data:image/png;base64, {{ $this->generateQrCodeForUuid($question_id) }}" alt="QR Code for Uuid">
+                </div>
             </div>
         </x-slot>
 

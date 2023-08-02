@@ -104,9 +104,18 @@ class ShowQuestions extends Component
         $url .= '/questions/'.$question_id.'/votes?user_id='.Auth::id();
 
         return base64_encode(QrCode::format('png')
-            ->size(256)
-            // ->color(255,255,255)->backgroundColor(0,0,0)
+            ->size(200)
             ->generate($url));
+    }
+
+    public function generateQrCodeForUuid($question_id)
+    {
+        return base64_encode(QrCode::format('png')
+            ->size(200)
+            ->generate(json_encode([
+                'user_id' => Auth::id(),
+                'question_id' => $question_id,
+            ])));
     }
 
     public function toggleQRCodeModal($question_id)
@@ -140,8 +149,11 @@ class ShowQuestions extends Component
         
         try {
             // Get the selected question text...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id)
-                ->throwUnlessStatus(200);
+            $response = Http::withHeaders([
+                    'session-id' => $this->session_id,
+                ])->get(self::getURL().'/questions/'.$this->question_id, [
+                    'user_id' => Auth::id(), // Until this becomes mandatory at the back-end
+                ])->throwUnlessStatus(200);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());

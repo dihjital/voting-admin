@@ -19,10 +19,12 @@ trait WithErrorMessage
         // Convert JSON string to PHP object
         $jsonPart = json_decode($jsonPart, true);
     
-        return [
-            'status_code' => $messagePart,
-            'details' => $jsonPart
-        ];
+        return $jsonPart 
+            ? [
+                'status_code' => $messagePart,
+                'details' => $jsonPart,
+            ]
+            : $errorMessage;
     }
 
     protected function extractStatusCode($message) 
@@ -36,14 +38,16 @@ trait WithErrorMessage
     
     protected function getStatusCode()
     {
-        return $this->extractStatusCode($this->error_message['status_code']);
+        return array_key_exists('status_code', is_array($this->error_message) ? $this->error_message : [])
+            ? $this->extractStatusCode($this->error_message['status_code'])
+            : __(500);
     }
 
     protected function getErrorMessage()
     {
-        return array_key_exists('message', $this->error_message['details'])
+        return array_key_exists('message', $this->error_message['details'] ?? [])
             ? $this->error_message['details']['message']
-            : __('No detailed error message available');
+            : __('No detailed error message available: ').$this->error_message;
     }
 
     protected function hasErrorMessage(): bool

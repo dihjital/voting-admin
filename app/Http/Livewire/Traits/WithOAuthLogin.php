@@ -140,6 +140,8 @@ trait WithOAuthLogin
         $response = Http::asForm()->post(self::getURL().'/login', [
             'email'     => $this->api_user,
             'password'  => $this->api_secret,
+            'client_id' => $this->client_id,
+            'client_secret' => $this->client_secret,
         ]);
 
         if (!$response->ok()) {

@@ -22,7 +22,7 @@ class ShowQuestions extends Component
 
     public $access_token;
     public $refresh_token;
-
+    
     public $error_message;
 
     public $question_id;

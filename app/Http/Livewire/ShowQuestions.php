@@ -234,7 +234,7 @@ class ShowQuestions extends Component
             $url = self::getURL().'/questions';
             
             $response = Http::withHeaders([
-                'session-id' => $this->session_id
+                    'session-id' => $this->session_id
                 ])->get($url, array_filter([
                     'page' => self::getPAGINATING() ? $page ?? request('page', 1) : '',
                     'user_id' => Auth::id(), // Until this becomes mandatory at the back-end

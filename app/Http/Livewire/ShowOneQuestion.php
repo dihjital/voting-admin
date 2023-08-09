@@ -228,5 +228,4 @@ class ShowOneQuestion extends Component
         $this->fetchData();
         return view('livewire.show-one-question');
     }
-
 }

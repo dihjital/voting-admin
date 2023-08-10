@@ -1,9 +1,8 @@
 <?php
 
-use App\Http\Controllers\QrCodeController;
-use App\Http\Livewire\ShowQuestions;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +29,10 @@ Route::middleware([
     'verified'
 ])->group(function () {
     Route::get('/dashboard', function () {
-        $result = Http::get(env('API_ENDPOINT').'/summary');
+        $result = Http::get(env('API_ENDPOINT').'/summary', [
+            'user_id' => Auth::id(),
+        ]
+        );
         return $result->ok()
             ? view('dashboard', [
                 'results' => (object) $result->json()

@@ -120,8 +120,12 @@ class ShowOneQuestion extends Component
         
         try {
             // Get the selected vote text...
-            $response = Http::get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+            $response = Http::withHeaders([
+                    'session-id' => $this->session_id
+                ])
+                ->get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
+            
             $this->vote_text = $response->json()['vote_text'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
@@ -140,7 +144,7 @@ class ShowOneQuestion extends Component
     public function vote($vote_id)
     {
         try {
-            // Vote ...
+            // TODO: Vote ... should be limited to questions owned by the currently logged in user ...
             $response = Http::patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 

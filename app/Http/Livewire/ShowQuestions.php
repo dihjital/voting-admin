@@ -81,6 +81,7 @@ class ShowQuestions extends Component
     public function openQuestion($question_id, $is_closed)
     {
         // Open or close the selected Question ...
+        // TODO: Move this to mandatory session-id check at the back-end
         try {
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
@@ -152,7 +153,7 @@ class ShowQuestions extends Component
             $response = Http::withHeaders([
                     'session-id' => $this->session_id,
                 ])->get(self::getURL().'/questions/'.$this->question_id, [
-                    'user_id' => Auth::id(), // Until this becomes mandatory at the back-end
+                    // 'user_id' => Auth::id(), // Until this becomes mandatory at the back-end
                 ])->throwUnlessStatus(200);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
@@ -208,8 +209,6 @@ class ShowQuestions extends Component
 
     public function delete($question_id)
     {
-        // TODO: If Paginating is enabled then deleting the last record on the page
-        // should move to the previous page. Now it stays on the empty page instead.
         $question_id ??= $this->question_id;
 
         try {
@@ -237,7 +236,6 @@ class ShowQuestions extends Component
                     'session-id' => $this->session_id
                 ])->get($url, array_filter([
                     'page' => self::getPAGINATING() ? $page ?? request('page', 1) : '',
-                    'user_id' => Auth::id(), // Until this becomes mandatory at the back-end
                 ]))
                 ->throwUnlessStatus(200);
 
@@ -263,5 +261,4 @@ class ShowQuestions extends Component
             'questions' => $this->fetchData($this->current_page),
         ]);
     }
-
 }

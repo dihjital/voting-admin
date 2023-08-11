@@ -26,13 +26,13 @@ Route::get('/', function () {
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
-    'verified'
+    'verified',
+    'backend.login', // Get the access_token and the session_id from the back-end for the currently logged in user ...
 ])->group(function () {
     Route::get('/dashboard', function () {
-        $result = Http::get(env('API_ENDPOINT').'/summary', [
-            'user_id' => Auth::id(),
-        ]
-        );
+        $result = Http::withHeaders([
+                'session-id' => session()->get(Auth::id().':session_id'),    
+            ])->get(env('API_ENDPOINT').'/summary');
         return $result->ok()
             ? view('dashboard', [
                 'results' => (object) $result->json()

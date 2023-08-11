@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Auth\Access\Response;
+
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -21,6 +25,17 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('hasApiSessionId', function () {
+            $session_key = Auth::id().':session_id';
+            return session()->has($session_key)
+                ? Response::allow()
+                : Response::deny(__('A valid session id is required to access the API back-end'));
+        });
+
+        Gate::define('hasApiAccessToken', function () {
+            return session()->has('access_token') && session()->has('refresh_token')
+                ? Response::allow()
+                : Response::deny(__('An access token is required to access the API back-end'));
+        });
     }
 }

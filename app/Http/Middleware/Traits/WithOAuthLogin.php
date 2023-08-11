@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Livewire\Traits;
+namespace App\Http\Middleware\Traits;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+
 use Carbon\Carbon;
 
 trait WithOAuthLogin

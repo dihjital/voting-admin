@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Livewire\Traits;
+namespace App\Http\Middleware\Traits;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 
 trait WithUUIDSession
 {
-    public $session_id;
-    public $session_key;
+    protected $session_id;
+    protected $session_key;
 
     protected function registerUUIDInSession($access_token)
     {

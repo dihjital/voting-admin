@@ -4,13 +4,13 @@ namespace App\Http\Livewire;
 
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
+use App\Http\Livewire\Traits\WithLogin;
 use App\Http\Livewire\Traits\WithErrorMessage;
-use App\Http\Livewire\Traits\WithOAuthLogin;
 use App\Http\Livewire\Traits\WithPerPagePagination;
-use App\Http\Livewire\Traits\WithUUIDSession;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+
 use Laravel\Jetstream\InteractsWithBanner;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -18,10 +18,7 @@ use Livewire\Component;
 
 class ShowQuestions extends Component
 {
-    use InteractsWithBanner, WithErrorMessage, WithPerPagePagination, WithOAuthLogin, WithUUIDSession;
-
-    public $access_token;
-    public $refresh_token;
+    use InteractsWithBanner, WithErrorMessage, WithPerPagePagination, WithLogin;
     
     public $error_message;
 
@@ -43,12 +40,9 @@ class ShowQuestions extends Component
 
     public function mount()
     {
+        // Check if the application has logged in to the API back-end successfully ...
         try {
-            // OAuth login process
-            list($this->access_token, $this->refresh_token) = $this->login();
-
-            // Send over the current user uuid and get a session id back
-            $this->registerUUIDInSession($this->access_token);
+            $this->login();
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }

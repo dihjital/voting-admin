@@ -8,15 +8,11 @@ use Laravel\Jetstream\InteractsWithBanner;
 use Livewire\Component;
 
 use App\Http\Livewire\Traits\WithErrorMessage;
-use App\Http\Livewire\Traits\WithOAuthLogin;
-use App\Http\Livewire\Traits\WithUUIDSession;
+use App\Http\Livewire\Traits\WithLogin;
 
 class ShowOneQuestion extends Component
 {
-    use InteractsWithBanner, WithErrorMessage, WithOAuthLogin, WithUUIDSession;
-
-    public $access_token;
-    public $refresh_token;
+    use InteractsWithBanner, WithErrorMessage, WithLogin;
 
     public $question_id;
     public $question_text;
@@ -40,12 +36,10 @@ class ShowOneQuestion extends Component
     public function mount($question_id)
     {
         $this->question_id = $question_id;
-
+        
+        // Check if the application has logged in to the API back-end successfully ...
         try {
-            list($this->access_token, $this->refresh_token) = $this->login();
-
-            // Send over the current user uuid and get a session id back
-            $this->registerUUIDInSession($this->access_token);
+            $this->login();
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }

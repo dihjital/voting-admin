@@ -82,7 +82,6 @@ class ShowQuestions extends Component
                     'session-id' => $this->session_id,
                 ])->patch(self::getURL().'/questions/'.$question_id, [
                     'is_closed' => ! $is_closed,
-                    'user_id' => Auth::id(), // Until it is not mondatory at the back-end
                 ])->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully updated'));

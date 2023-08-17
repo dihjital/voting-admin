@@ -40,14 +40,17 @@ trait WithErrorMessage
     {
         return array_key_exists('status_code', is_array($this->error_message) ? $this->error_message : [])
             ? $this->extractStatusCode($this->error_message['status_code'])
-            : __(500);
+            // : __(500);
+            : $this->extractStatusCode($this->error_message) ?? '500';
     }
 
     protected function getErrorMessage()
     {
         return array_key_exists('message', $this->error_message['details'] ?? [])
             ? $this->error_message['details']['message']
-            : __('No detailed error message available: ').$this->error_message;
+            // : __('No detailed error message available: ').$this->error_message;
+            : __('Error message: ').$this->error_message;
+
     }
 
     protected function hasErrorMessage(): bool

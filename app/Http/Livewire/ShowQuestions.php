@@ -79,7 +79,7 @@ class ShowQuestions extends Component
         try {
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
-                    'session-id' => $this->session_id
+                    'session-id' => $this->session_id,
                 ])->patch(self::getURL().'/questions/'.$question_id, [
                     'is_closed' => ! $is_closed,
                     'user_id' => Auth::id(), // Until it is not mondatory at the back-end
@@ -144,11 +144,12 @@ class ShowQuestions extends Component
         
         try {
             // Get the selected question text...
-            $response = Http::withHeaders([
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
                     'session-id' => $this->session_id,
-                ])->get(self::getURL().'/questions/'.$this->question_id, [
-                    // 'user_id' => Auth::id(), // Until this becomes mandatory at the back-end
-                ])->throwUnlessStatus(200);
+                ])
+                ->get(self::getURL().'/questions/'.$this->question_id)
+                ->throwUnlessStatus(200);
             $this->question_text = $response->json()['question_text'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
@@ -226,7 +227,8 @@ class ShowQuestions extends Component
         try {
             $url = self::getURL().'/questions';
             
-            $response = Http::withHeaders([
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
                     'session-id' => $this->session_id
                 ])->get($url, array_filter([
                     'page' => self::getPAGINATING() ? $page ?? request('page', 1) : '',

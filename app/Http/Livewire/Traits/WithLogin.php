@@ -14,11 +14,13 @@ trait WithLogin
 
     protected function login()
     {
-        if (Gate::any(['hasApiAccessToken', 'hasApiSessionId'])) {
-            $this->access_token = session()->get('access_token');
-            $this->refresh_token = session()->get('refresh_token');
+        Gate::authorize('hasApiAccessToken');
 
-            $this->session_id = session()->get(Auth::id().':session_id');
-        }
+        $this->access_token = session()->get('access_token');
+        $this->refresh_token = session()->get('refresh_token');
+
+        Gate::authorize('hasApiSessionId');
+
+        $this->session_id = session()->get(Auth::id().':session_id');
     }
 }

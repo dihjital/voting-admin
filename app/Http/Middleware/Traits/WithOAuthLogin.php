@@ -4,6 +4,8 @@ namespace App\Http\Middleware\Traits;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 use Carbon\Carbon;
 
@@ -22,6 +24,24 @@ trait WithOAuthLogin
 
         $this->client_id = env('PASSPORT_CLIENT_ID');
         $this->client_secret = env('PASSPORT_CLIENT_SECRET');
+
+        // TODO: For some reason the session variables are not set when a new token is requested from the back-end
+        // This is only a work-around until we find the right solution
+        $this->deleteTokensFromSession();
+
+        $this->scope = [
+            'list-questions',
+            'list-votes',
+            'create-question',
+            'create-vote',
+            'delete-question',
+            'delete-votes',
+            'delete-vote',
+            'modify-question',
+            'modify-vote',
+            'close-question',
+            'vote',
+        ];
     }
 
     protected function checkHalfTime($issued_at, $expires_in): bool
@@ -38,15 +58,25 @@ trait WithOAuthLogin
     protected function getTokensFromSession(): array
     {
         return [
-            session()?->get('access_token'),
-            session()?->get('refresh_token'),
+            Session::get('access_token'),
+            Session::get('refresh_token'),
         ];
     }
 
     protected function storeTokensInSession($access_token, $refresh_token): void
     {
-        session()->put('access_token', $access_token);
-        session()->put('refresh_token', $refresh_token);
+        $this->deleteTokensFromSession();
+
+        Session::put('access_token', $access_token);
+        Session::put('refresh_token', $refresh_token);
+    }
+
+    protected function deleteTokensFromSession(): void
+    {
+        Session::forget([
+            'access_token',
+            'refresh_token'
+        ]);
     }
 
     protected function getTokensFromCache(): array
@@ -68,6 +98,7 @@ trait WithOAuthLogin
 
     protected function storeTokensInCache($access_token, $refresh_token, $expires_in): void
     {
+        $this->deleteTokensFromSession();
         $this->deleteTokensFromCache();
 
         Cache::put('access_token', $access_token);
@@ -91,7 +122,7 @@ trait WithOAuthLogin
             'refresh_token' => $refresh_token,
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
-            'scope' => '',
+            'scope' => implode(' ', $this->scope),
         ]);
 
         if ($response->ok()) {
@@ -101,6 +132,8 @@ trait WithOAuthLogin
                 $response['expires_in']
             ];
         }
+
+        $this->deleteTokensFromCache();
 
         // TODO: Log here that refresh-token has failed. Use Log::error
         return [];
@@ -115,6 +148,7 @@ trait WithOAuthLogin
     {
         $tokens = $this->getTokensFromSession();
         if (self::numberOfNonEmptyElements($tokens) === 2) {
+            Log::debug('Returning tokens from session');
             return $tokens;
         }
 
@@ -129,10 +163,12 @@ trait WithOAuthLogin
                     list($access_token, $refresh_token, $expires_in) = $tokens;
                     $this->storeTokensInSession($access_token, $refresh_token);
                     $this->storeTokensInCache($access_token, $refresh_token, $expires_in);
+                    Log::debug('Returning tokens after re-fresh from the back-end');
                     return [$access_token, $refresh_token];
                 }
             } else {
                 $this->storeTokensInSession($access_token, $refresh_token);
+                Log::debug('Returning tokens from cache');
                 return [$access_token, $refresh_token];
             }
         }
@@ -143,6 +179,7 @@ trait WithOAuthLogin
             'password'  => $this->api_secret,
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
+            'scope' => implode(' ', $this->scope),
         ]);
 
         if (!$response->ok()) {
@@ -156,7 +193,7 @@ trait WithOAuthLogin
         $this->storeTokensInSession($access_token, $refresh_token);
         $this->storeTokensInCache($access_token, $refresh_token, $expires_in);
 
+        Log::debug('Returning tokens from the back-end');
         return [$access_token, $refresh_token];
     }
-
 }

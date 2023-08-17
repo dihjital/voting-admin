@@ -42,9 +42,10 @@ trait WithUUIDSession
     protected function requestNewSessionId($access_token, $user_id = '')
     {
         $response = Http::withToken($access_token)
-        ->post(self::getURL().'/session', [
-            'user_id' => $user_id ?: Auth::id(),
-        ])->throwUnlessStatus(200);
+            ->post(self::getURL().'/session', [
+                'user_id' => $user_id ?: Auth::id(),
+            ])
+            ->throwUnlessStatus(200);
 
         $this->storeSessionId($response->json()['session_id']);
         

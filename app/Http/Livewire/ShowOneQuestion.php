@@ -72,7 +72,8 @@ class ShowOneQuestion extends Component
     {
         try {
             // Get the votes ...
-            $response = Http::withHeaders([
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
                     'session-id' => $this->session_id
                 ])
                 ->get(self::getURL().'/questions/'.$this->question_id.'/votes')
@@ -81,7 +82,8 @@ class ShowOneQuestion extends Component
             $this->votes = $response->json();
 
             // Get the question text and whether it is open for any modification ...
-            $response = Http::withHeaders([
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
                     'session-id' => $this->session_id
                 ])
                 ->get(self::getURL().'/questions/'.$this->question_id)
@@ -114,7 +116,8 @@ class ShowOneQuestion extends Component
         
         try {
             // Get the selected vote text...
-            $response = Http::withHeaders([
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
                     'session-id' => $this->session_id
                 ])
                 ->get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
@@ -138,8 +141,11 @@ class ShowOneQuestion extends Component
     public function vote($vote_id)
     {
         try {
-            // TODO: Vote ... should be limited to questions owned by the currently logged in user ...
-            $response = Http::patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
+                    'session-id' => $this->session_id
+                ])
+                ->patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Successful vote'));

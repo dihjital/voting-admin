@@ -102,7 +102,7 @@ class ShowQuestions extends Component
             ->generate($url));
     }
 
-    public function generateQrCodeForUuid($question_id)
+    public function generateQrCodeForMobile($question_id)
     {
         return base64_encode(QrCode::format('png')
             ->size(200)

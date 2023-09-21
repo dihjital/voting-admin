@@ -67,7 +67,7 @@
     <!-- QR Code Modal -->
     <x-dialog-modal wire:model="results_qrcode" maxWidth="lg">
         <x-slot name="title">
-            {{ __('QR Code for results') }}
+            {{ __('QR Code for voting') }}
         </x-slot>
 
         <x-slot name="content">

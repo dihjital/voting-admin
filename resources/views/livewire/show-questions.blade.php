@@ -71,14 +71,14 @@
         </x-slot>
 
         <x-slot name="content">
-            {{ __('With the QR Code on the left you can monitor the results of your voting. The QR Code on the right allows you to open the voting client with the relevant question.') }}
+            {{ __('To use the web based voting client please scan the QR code on the left. The QR Code on the right can be consumed by the mobile voting client only.') }}
 
             <div class="flex mt-4 justify-center items-center space-x-4">
                 <div class="w-1/2">
-                    <img src="data:image/png;base64, {{ $this->generateQrCode($question_id) }}" alt="QR Code for {{ $question_id }}">
+                    <img src="data:image/png;base64, {{ $this->generateQrCode($question_id) }}" alt="QR Code for web based voting client for {{ $question_id }}">
                 </div>
                 <div class="w-1/2">
-                    <img src="data:image/png;base64, {{ $this->generateQrCodeForUuid($question_id) }}" alt="QR Code for Uuid">
+                    <img src="data:image/png;base64, {{ $this->generateQrCodeForMobile($question_id) }}" alt="QR Code for mobile voting client for {{ $question_id }}">
                 </div>
             </div>
         </x-slot>

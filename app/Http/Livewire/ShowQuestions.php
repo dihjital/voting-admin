@@ -94,8 +94,8 @@ class ShowQuestions extends Component
     public function generateQrCode($question_id)
     {
         // TODO: Move this to a separate method
-        $url = env('RESULTS_URL', 'https://voting-results.votes365.org');
-        $url .= '/questions/'.$question_id.'/votes?user_id='.Auth::id();
+        $url = env('CLIENT_URL', 'https://voting-client.votes365.org');
+        $url .= '/questions/'.$question_id.'/votes?uuid='.Auth::id();
 
         return base64_encode(QrCode::format('png')
             ->size(200)

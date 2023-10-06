@@ -8,6 +8,7 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 use Illuminate\Support\Facades\Event;
 
 use App\Events\UserChanged;
+use App\Listeners\LogRegisteredUser;
 use App\Listeners\ProcessUserChanged;
 
 class EventServiceProvider extends ServiceProvider
@@ -20,6 +21,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            LogRegisteredUser::class,
         ],
         UserChanged::class => [
             ProcessUserChanged::class,

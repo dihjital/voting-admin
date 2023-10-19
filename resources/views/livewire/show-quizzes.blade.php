@@ -7,7 +7,7 @@
     @else
     <x-table>
         <x-slot name="head">
-            <x-table.heading class="w-1/12">{{ __('Quiz number') }}</x-table.heading>
+            <x-table.heading class="w-1/12">#</x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Quiz text') }}</x-table.heading>
             <x-table.heading class="w-1/12">{{ __('Closed?') }}</x-table.heading>
             <x-table.heading class="w-2/12">{{ __('Number of answers') }}</x-table.heading>

@@ -252,7 +252,7 @@ class ShowQuizzes extends Component
 
     public function render()
     {
-        return view('livewire.show-questions', [
+        return view('livewire.show-quizzes', [
             'questions' => $this->fetchData($this->current_page),
         ]);
     }

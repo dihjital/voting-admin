@@ -26,6 +26,9 @@ Route::middleware([
     'backend.login', // Get the access_token and the session_id from the back-end for the currently logged in user ...
 ])->group(function () {
     Route::get('/dashboard', [SummaryController::class, 'display'])->name('dashboard');
+    Route::get('/quizzes', function () {
+        return view('list-all-quizzes');
+    })->name('quizzes');
     Route::get('/questions', function () {
         return view('list-all-questions');
     })->name('questions');

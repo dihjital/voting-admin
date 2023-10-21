@@ -25,6 +25,8 @@ class ShowQuestions extends Component
     public $question_id;
     public $question_text;
 
+    public $quiz_id;
+
     public $results_qrcode = false;
     public $confirm_delete = false;
     public $update_question = false;
@@ -38,8 +40,11 @@ class ShowQuestions extends Component
         // 'is_closed' => 'nullable|boolean', Should add a property as well to the model
     ];
 
-    public function mount()
+    public function mount($quiz_id = null)
     {
+        // It will only assing $quiz_id to the public variable if the public variable is null ...
+        $this->quiz_id ??= $quiz_id;
+
         // Check if the application has logged in to the API back-end successfully ...
         try {
             $this->login();
@@ -166,6 +171,7 @@ class ShowQuestions extends Component
                     'session-id' => $this->session_id
                 ])->post(self::getURL().'/questions', [
                     'question_text' => $this->question_text,
+                    'quiz_id' => $this->quiz_id ?? null,
                 ])->throwUnlessStatus(201);
 
             $this->banner(__('Question successfully created'));
@@ -224,7 +230,9 @@ class ShowQuestions extends Component
     public function fetchData($page = null)
     {
         try {
-            $url = self::getURL().'/questions';
+            $url = $this->quiz_id
+                ? self::getURL().'/quizzes/'.$this->quiz_id.'/questions'
+                : self::getURL().'/questions';
             
             $response = Http::withToken($this->access_token)
                 ->withHeaders([

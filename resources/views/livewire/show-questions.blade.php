@@ -10,7 +10,7 @@
             <x-table.heading class="w-1/12">#</x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Question text') }}</x-table.heading>
             <x-table.heading class="w-1/12">{{ __('Closed?') }}</x-table.heading>
-            <x-table.heading class="w-2/12">{{ __('Number of answers') }}</x-table.heading>
+            <x-table.heading class="w-2/12">{{ __('# of answers') }}</x-table.heading>
             <x-table.heading class="w-2/12"></x-table.heading>
         </x-slot>
         <x-slot name="body">

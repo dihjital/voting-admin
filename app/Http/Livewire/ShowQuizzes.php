@@ -22,19 +22,19 @@ class ShowQuizzes extends Component
     
     public $error_message;
 
-    public $question_id;
-    public $question_text;
+    public $quiz_id;
+    public $name;
 
     public $results_qrcode = false;
     public $confirm_delete = false;
-    public $update_question = false;
-    public $new_question = false;
+    public $update_quiz = false;
+    public $new_quiz = false;
 
     const URL = 'http://localhost:8000';
     const PAGINATING = TRUE;
 
     protected $rules = [
-        'question_text' => 'required|min:6',
+        'name' => 'required|min:6',
         // 'is_closed' => 'nullable|boolean', Should add a property as well to the model
     ];
 
@@ -91,31 +91,31 @@ class ShowQuizzes extends Component
         }
     }
 
-    public function generateQrCode($question_id)
+    public function generateQrCode($quiz_id)
     {
         // TODO: Move this to a separate method
         $url = env('CLIENT_URL', 'https://voting-client.votes365.org');
-        $url .= '/questions/'.$question_id.'/votes?uuid='.Auth::id();
+        $url .= '/quizzes/'.$quiz_id.'/questions?uuid='.Auth::id();
 
         return base64_encode(QrCode::format('png')
             ->size(200)
             ->generate($url));
     }
 
-    public function generateQrCodeForMobile($question_id)
+    public function generateQrCodeForMobile($quiz_id)
     {
         return base64_encode(QrCode::format('png')
             ->size(200)
             ->generate(json_encode([
                 'user_id' => Auth::id(),
-                'question_id' => $question_id,
+                'quiz_id' => $quiz_id,
             ])));
     }
 
-    public function toggleQRCodeModal($question_id)
+    public function toggleQRCodeModal($quiz_id)
     {
         $this->results_qrcode = ! $this->results_qrcode;
-        $this->question_id = $question_id;
+        $this->quiz_id = $quiz_id;
     }
 
     public function toggleCreateQuestionModal()
@@ -123,33 +123,33 @@ class ShowQuizzes extends Component
         $this->resetErrorBag();
         $this->resetValidation();
 
-        $this->question_text = '';
-        $this->new_question = ! $this->new_question;
+        $this->name = '';
+        $this->new_quiz = ! $this->new_quiz;
     }
 
-    public function toggleDeleteQuestionModal($question_id)
+    public function toggleDeleteQuizModal($quiz_id)
     {
         $this->confirm_delete = ! $this->confirm_delete;
-        $this->question_id = $question_id;
+        $this->quiz_id = $quiz_id;
     }
 
-    public function toggleUpdateQuestionModal($question_id)
+    public function toggleUpdateQuizModal($quiz_id)
     {
         $this->resetErrorBag();
         $this->resetValidation();
 
-        $this->update_question = ! $this->update_question;
-        $this->question_id = $question_id;
+        $this->update_quiz = ! $this->update_quiz;
+        $this->quiz_id = $quiz_id;
         
         try {
-            // Get the selected question text...
+            // Get the selected Quiz name ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
-                ->get(self::getURL().'/questions/'.$this->question_id)
+                ->get(self::getURL().'/quizzes/'.$this->quiz_id)
                 ->throwUnlessStatus(200);
-            $this->question_text = $response->json()['question_text'];
+            $this->name = $response->json()['name'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
@@ -160,60 +160,60 @@ class ShowQuizzes extends Component
         $this->validate();
 
         try {
-            // Create a new question ...
+            // Create a new Quiz ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->post(self::getURL().'/questions', [
-                    'question_text' => $this->question_text,
+                ])->post(self::getURL().'/quizzes', [
+                    'name' => $this->name,
                 ])->throwUnlessStatus(201);
 
-            $this->banner(__('Question successfully created'));
-            $this->emit('confirming-question-create');
+            $this->banner(__('Quiz successfully created'));
+            $this->emit('confirming-quiz-create');
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
-        $this->new_question = !$this->new_question;
+        $this->new_quiz = !$this->new_quiz;
     }
 
-    public function update($question_id)
+    public function update($quiz_id)
     {
-        $question_id ??= $this->question_id;
+        $quiz_id ??= $this->quiz_id;
 
         $this->validate();
 
         try {
-            // Update the selected vote ...
+            // Update the selected Quiz ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->put(self::getURL().'/questions/'.$this->question_id, [
-                    'question_text' => $this->question_text,
+                ])->put(self::getURL().'/quiz/'.$quiz_id, [
+                    'name' => $this->name,
                 ])->throwUnlessStatus(200);
 
-            $this->banner(__('Question successfully updated'));
-            $this->emit('confirming-question-text-update');
+            $this->banner(__('Quiz successfully updated'));
+            $this->emit('confirming-quiz-name-update');
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
-        $this->update_question = !$this->update_question;
+        $this->update_quiz = !$this->update_quiz;
     }
 
-    public function delete($question_id)
+    public function delete($quiz_id)
     {
-        $question_id ??= $this->question_id;
+        $quiz_id ??= $this->quiz_id;
 
         try {
-            // Delete the selected vote ...
+            // Delete the selected Quiz ...
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->delete(self::getURL().'/questions/'.$this->question_id)
+                ])->delete(self::getURL().'/quizzes/'.$quiz_id)
                 ->throwUnlessStatus(200);
 
-            $this->banner(__('Question successfully deleted'));
+            $this->banner(__('Quiz deleted successfully'));
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
@@ -224,7 +224,7 @@ class ShowQuizzes extends Component
     public function fetchData($page = null)
     {
         try {
-            $url = self::getURL().'/questions';
+            $url = self::getURL().'/quizzes';
             
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
@@ -242,7 +242,7 @@ class ShowQuizzes extends Component
                     $data['total'],
                     $data['per_page'],
                     $data['current_page'],
-                    ['path' => url('/questions')]
+                    ['path' => url('/quizzes')]
                 )
                 : $data;
         } catch (\Exception $e) {
@@ -253,7 +253,7 @@ class ShowQuizzes extends Component
     public function render()
     {
         return view('livewire.show-quizzes', [
-            'questions' => $this->fetchData($this->current_page),
+            'quizzes' => $this->fetchData($this->current_page),
         ]);
     }
 }

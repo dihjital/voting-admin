@@ -37,9 +37,9 @@
     @else
     <x-table>
         <x-slot name="head">
-            <x-table.heading class="w-1/12">{{ __('Vote number') }}</x-table.heading>
+            <x-table.heading class="w-1/12">#</x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Vote text') }}</x-table.heading>
-            <x-table.heading class="w-2/12">{{ __('Number of votes received') }}</x-table.heading>
+            <x-table.heading class="w-2/12">{{ __('# of votes received') }}</x-table.heading>
             <x-table.heading class="w-1/12">{{ __('Vote') }}</x-table.heading>
             <x-table.heading class="w-2/12"></x-table.heading>
         </x-slot>

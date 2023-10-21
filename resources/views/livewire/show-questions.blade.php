@@ -8,15 +8,24 @@
     <x-table>
         <x-slot name="head">
             <x-table.heading class="w-1/12">#</x-table.heading>
+            <x-table.heading class="w-1/12"></x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Question text') }}</x-table.heading>
             <x-table.heading class="w-1/12">{{ __('Closed?') }}</x-table.heading>
             <x-table.heading class="w-2/12">{{ __('# of answers') }}</x-table.heading>
-            <x-table.heading class="w-2/12"></x-table.heading>
+            <x-table.heading class="w-1/12"></x-table.heading>
         </x-slot>
         <x-slot name="body">
             @forelse($questions as $q)
             <x-table.row wire:loading.class.delay="opacity-75" wire:key="row-{{ $q['id'] }}">
                 <x-table.cell>{{ $q['id'] }}</x-table.cell>
+                <x-table.cell class="space-x-1">
+                    @if($q['belongs_to_quiz'])
+                        <i class="fa-solid fa-trophy" title="{{ __('This question belongs to a quiz') }}"></i>
+                    @endif
+                    @if($q['is_closed'])
+                        <i class="fa-solid fa-lock" title="{{ __('This question is closed') }}"></i>
+                    @endif
+                </x-table.cell>
                 <x-table.cell>
                     <a href="/questions/{{ $q['id'] }}/votes">
                         {{ $q['question_text'] }}
@@ -46,7 +55,7 @@
             </x-table.row>
             @empty
             <x-table.row wire:key="row-empty">
-                <x-table.cell colspan="5" class="whitespace-nowrap">
+                <x-table.cell colspan="6" class="whitespace-nowrap">
                     <div class="flex justify-center items-center">
                         <span class="py-8 text-base text-center font-medium text-gray-400 uppercase">{{ __('There are no questions in the database') }} ...</span>
                     </div>

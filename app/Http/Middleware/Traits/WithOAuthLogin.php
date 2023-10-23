@@ -30,13 +30,17 @@ trait WithOAuthLogin
         $this->deleteTokensFromSession();
 
         $this->scope = [
+            'list-quizzes',
             'list-questions',
             'list-votes',
+            'create-quiz',
             'create-question',
             'create-vote',
+            'delete-quiz',
             'delete-question',
             'delete-votes',
             'delete-vote',
+            'modify-quiz',
             'modify-question',
             'modify-vote',
             'close-question',

@@ -19,7 +19,7 @@ class LogRegisteredUser
      */
     public function __construct()
     { 
-        $this->adminEmailAddress = env('MAIL_ADMIN_ADDRESS', 'voting-admin@mg.votes365.org');
+        $this->adminEmailAddress = env('MAIL_ADMIN_ADDRESS', 'voting-admin@votes365.org');
     }
 
     /**

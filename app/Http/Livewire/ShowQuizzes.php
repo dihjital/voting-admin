@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 use App\Http\Livewire\Traits\WithLogin;
+use App\Http\Livewire\Traits\WithUUIDSession;
 use App\Http\Livewire\Traits\WithErrorMessage;
 use App\Http\Livewire\Traits\WithPerPagePagination;
 
@@ -14,11 +15,13 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Jetstream\InteractsWithBanner;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+use Illuminate\Http\Client\PendingRequest;
+
 use Livewire\Component;
 
 class ShowQuizzes extends Component
 {
-    use InteractsWithBanner, WithErrorMessage, WithPerPagePagination, WithLogin;
+    use InteractsWithBanner, WithErrorMessage, WithPerPagePagination, WithLogin, WithUUIDSession;
     
     public $error_message;
 
@@ -40,9 +43,12 @@ class ShowQuizzes extends Component
 
     public function mount()
     {
-        // Check if the application has logged in to the API back-end successfully ...
         try {
-            $this->login();
+            list(
+                'access_token' => $this->access_token,
+                'refresh_token' => $this->refresh_token
+            ) = $this->getTokensFromCache();
+            $this->session_id = $this->startSessionIfRequired($this->access_token);
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
@@ -70,25 +76,6 @@ class ShowQuizzes extends Component
                 '1' => 'bg-gray-500 hover:bg-gray-600',
             ],
         ][$button][$is_closed];
-    }
-
-    public function openQuestion($question_id, $is_closed)
-    {
-        // Open or close the selected Question ...
-        // TODO: Move this to mandatory session-id check at the back-end
-        try {
-            $response = Http::withToken($this->access_token)
-                ->withHeaders([
-                    'session-id' => $this->session_id,
-                ])->patch(self::getURL().'/questions/'.$question_id, [
-                    'is_closed' => ! $is_closed,
-                ])->throwUnlessStatus(200);
-
-            $this->banner(__('Question successfully updated'));
-            $this->emit('confirming-question-text-update');
-        } catch (\Exception $e) {
-            $this->error_message = $this->parseErrorMessage($e->getMessage());
-        }
     }
 
     public function generateQrCode($quiz_id)
@@ -147,8 +134,12 @@ class ShowQuizzes extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->get(self::getURL().'/quizzes/'.$this->quiz_id)
                 ->throwUnlessStatus(200);
+
             $this->name = $response->json()['name'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
@@ -164,9 +155,14 @@ class ShowQuizzes extends Component
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->post(self::getURL().'/quizzes', [
+                ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
+                ->post(self::getURL().'/quizzes', [
                     'name' => $this->name,
-                ])->throwUnlessStatus(201);
+                ])
+                ->throwUnlessStatus(201);
 
             $this->banner(__('Quiz successfully created'));
             $this->emit('confirming-quiz-create');
@@ -188,9 +184,14 @@ class ShowQuizzes extends Component
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->put(self::getURL().'/quiz/'.$quiz_id, [
+                ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
+                ->put(self::getURL().'/quiz/'.$quiz_id, [
                     'name' => $this->name,
-                ])->throwUnlessStatus(200);
+                ])
+                ->throwUnlessStatus(200);
 
             $this->banner(__('Quiz successfully updated'));
             $this->emit('confirming-quiz-name-update');
@@ -210,7 +211,11 @@ class ShowQuizzes extends Component
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->delete(self::getURL().'/quizzes/'.$quiz_id)
+                ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
+                ->delete(self::getURL().'/quizzes/'.$quiz_id)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Quiz deleted successfully'));
@@ -229,7 +234,11 @@ class ShowQuizzes extends Component
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
-                ])->get($url, array_filter([
+                ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
+                ->get($url, array_filter([
                     'page' => self::getPAGINATING() ? $page ?? request('page', 1) : '',
                 ]))
                 ->throwUnlessStatus(200);

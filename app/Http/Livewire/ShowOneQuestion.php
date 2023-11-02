@@ -7,12 +7,15 @@ use Laravel\Jetstream\InteractsWithBanner;
 
 use Livewire\Component;
 
-use App\Http\Livewire\Traits\WithErrorMessage;
 use App\Http\Livewire\Traits\WithLogin;
+use App\Http\Livewire\Traits\WithUUIDSession;
+use App\Http\Livewire\Traits\WithErrorMessage;
+
+use Illuminate\Http\Client\PendingRequest;
 
 class ShowOneQuestion extends Component
 {
-    use InteractsWithBanner, WithErrorMessage, WithLogin;
+    use InteractsWithBanner, WithErrorMessage, WithLogin, WithUUIDSession;
 
     public $question_id;
     public $question_text;
@@ -37,9 +40,12 @@ class ShowOneQuestion extends Component
     {
         $this->question_id = $question_id;
         
-        // Check if the application has logged in to the API back-end successfully ...
         try {
-            $this->login();
+            list(
+                'access_token' => $this->access_token,
+                'refresh_token' => $this->refresh_token
+            ) = $this->getTokensFromCache();
+            $this->session_id = $this->startSessionIfRequired($this->access_token);
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
@@ -76,6 +82,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->get(self::getURL().'/questions/'.$this->question_id.'/votes')
                 ->throwUnlessStatus(200);
 
@@ -86,6 +95,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->get(self::getURL().'/questions/'.$this->question_id)
                 ->throwUnlessStatus(200);
             
@@ -120,6 +132,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
             
@@ -145,6 +160,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 
@@ -164,6 +182,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->post(self::getURL().'/questions/'.$this->question_id.'/votes', [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
@@ -191,6 +212,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->put(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id, [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
@@ -216,6 +240,9 @@ class ShowOneQuestion extends Component
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
                 ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 

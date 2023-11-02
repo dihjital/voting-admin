@@ -23,20 +23,23 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    'backend.login', // Get the access_token and the session_id from the back-end for the currently logged in user ...
 ])->group(function () {
     Route::get('/dashboard', [SummaryController::class, 'display'])->name('dashboard');
+
     Route::get('/quizzes', function () {
         return view('list-all-quizzes');
     })->name('quizzes');
+
     Route::get('/quizzes/{quiz_id}/questions', function ($quiz_id) {
         return view('list-all-questions', 
             ['quiz_id' => $quiz_id]
         );
     })->name('quiz_questions');
+
     Route::get('/questions', function () {
         return view('list-all-questions');
     })->name('questions');
+    
     Route::get('/questions/{question_id}/votes', function ($question_id) {
         return view('list-one-question', [
             'question_id' => $question_id,

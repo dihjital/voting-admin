@@ -38,7 +38,6 @@ class ShowQuizzes extends Component
 
     protected $rules = [
         'name' => 'required|min:6',
-        // 'is_closed' => 'nullable|boolean', Should add a property as well to the model
     ];
 
     public function mount()
@@ -188,7 +187,7 @@ class ShowQuizzes extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->put(self::getURL().'/quiz/'.$quiz_id, [
+                ->put(self::getURL().'/quizzes/'.$quiz_id, [
                     'name' => $this->name,
                 ])
                 ->throwUnlessStatus(200);

@@ -27,7 +27,7 @@
                         <button type="button" @disabled(0) wire:click="toggleQRCodeModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', 0) }} text-white text-xs rounded-md">
                             <i class="fas fa-qrcode fa-sm" aria-hidden="true" title="{{ __('QR Code') }}"></i>
                         </button>
-                        <button type="button" @disabled(1) wire:click="toggleUpdateQuizModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', 1) }} text-white text-xs rounded-md">
+                        <button type="button" @disabled(0) wire:click="toggleUpdateQuizModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('modify', 0) }} text-white text-xs rounded-md">
                             <i class="fas fa-edit fa-sm" aria-hidden="true" title="{{ __('Update') }}"></i>
                         </button>
                         <button type="button" @disabled(0) wire:click="toggleDeleteQuizModal({{ $q['id'] }})" class="px-3 py-3 {{ $this->closedColor('delete', 0) }} text-white text-xs rounded-md">
@@ -89,7 +89,7 @@
         </x-slot>
 
         <x-slot name="content">
-            {{ __('Please enter the name of your quiz. This action will create a new quiz, and add the selected questions to it. A question can belong to multiple quizzes.') }}
+            {{ __('Please enter a descriptive name for your new quiz. To add questions use the plus sign at the bottom right side of the screen.') }}
 
             <div class="mt-4" x-data="{}" x-on:confirming-quiz-create.window="setTimeout(() => $refs.quiz_name.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"
@@ -114,14 +114,14 @@
         </x-slot>
     </x-dialog-modal>
 
-    <!-- Update Question Modal -->
+    <!-- Update Quiz Modal -->
     <x-dialog-modal wire:model="update_quiz">
         <x-slot name="title">
             {{ __('Update Quiz') }}
         </x-slot>
 
         <x-slot name="content">
-            {{ __('Please enter a new name for the selected quiz or add, remove any questions to it.') }}
+            {{ __('Please enter a new name for the selected quiz. This action will only rename the quiz and will not affect the questions belonging to it.') }}
 
             <div class="mt-4" x-data="{}" x-on:confirming-quiz-name-update.window="setTimeout(() => $refs.quiz_name.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"

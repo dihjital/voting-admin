@@ -19,7 +19,7 @@
                     <a href="https://www.votes365.org/#pricing" class="mr-4 hover:underline md:mr-6 ">Licensing</a>
                 </li>
                 <li>
-                    <a href="mailto:support@mg.votes365.org" class="hover:underline">Contact</a>
+                    <a href="mailto:support@votes365.org" class="hover:underline">Contact</a>
                 </li>
             </ul>
         </div>

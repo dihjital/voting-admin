@@ -121,7 +121,8 @@
         </x-slot>
 
         <x-slot name="content">
-            {{ __('Please enter your new text for the selected vote option. This action will reset the current number of votes to 0.') }}
+            <p>{{ __('You can modify the text of the selected voting option. This action will set the number of votes to 0 if the Reset number of votes to 0 checkbox is selected.') }}</p>
+            <p class="mt-1">{{ __('Please note that resetting the number of votes to 0 will also remove all locations belonging to this voting option from the database.') }}</p>
 
             <div class="mt-4" x-data="{}" x-on:confirming-vote-text-update.window="setTimeout(() => $refs.vote_text.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"
@@ -133,6 +134,18 @@
 
                 <x-input-error for="vote_text" class="mt-2" />
             </div>
+
+            <div class="mt-4" x-data="{}" x-on:confirming-reset-number-of-votes-update.window="setTimeout(() => $refs.reset_number_of_votes.focus(), 250)">
+                <label for="reset_number_of_votes" class="inline-flex items-center">
+                    <x-input type="checkbox" id="reset_number_of_votes" class="mt-1 block"
+                            x-ref="keep_number_of_votes"
+                            wire:model.defer="reset_number_of_votes"
+                            wire:keydown.enter="update({{ $vote_id }})" />
+                    <span class="ml-2 text-gray-600 dark:text-gray-400">{{ __('Reset number of votes to 0') }}</span>
+                </label>
+            
+                <x-input-error for="reset_number_of_votes" class="mt-2" />
+            </div>            
         </x-slot>
 
         <x-slot name="footer">

@@ -77,11 +77,15 @@ class ShowQuizzes extends Component
         ][$button][$is_closed];
     }
 
+    public function getQrCodeUrlForVotingClient($quiz_id)
+    {
+        return  env('CLIENT_URL', 'https://voting-client.votes365.org').
+                '/quizzes/'.$quiz_id.'/questions?uuid='.Auth::id();
+    }
+
     public function generateQrCode($quiz_id)
     {
-        // TODO: Move this to a separate method
-        $url = env('CLIENT_URL', 'https://voting-client.votes365.org');
-        $url .= '/quizzes/'.$quiz_id.'/questions?uuid='.Auth::id();
+        $url = $this->getQrCodeUrlForVotingClient($quiz_id);
 
         return base64_encode(QrCode::format('png')
             ->size(200)

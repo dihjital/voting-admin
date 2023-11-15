@@ -73,6 +73,31 @@
                     <img src="data:image/png;base64, {{ $this->generateQrCodeForMobile($quiz_id) }}" alt="QR Code for mobile voting client for {{ $quiz_id }}">
                 </div>
             </div>
+
+            <!-- Copy link from QR code text box -->
+            <div class="flex items-center mt-4" style="align-items: stretch;">
+                <!-- URL Link -->
+                <a href="{{ $this->getQrCodeUrlForVotingClient($quiz_id) }}" target="_blank" class="flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 text-blue-500 dark:text-blue-300 rounded-l-md focus:outline-none focus:shadow-outline-blue hover:bg-gray-300 dark:hover:bg-gray-700">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                
+                <!-- Input Field -->
+                <input id="qr_code_url_link" type="text" value="{{ $this->getQrCodeUrlForVotingClient($quiz_id) }}" class="px-4 py-2 border border-gray-100 dark:border-gray-700 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 dark:bg-gray-800">
+                
+                <!-- Copy Button -->
+                <button onclick="copyToClipboard()" class="px-4 py-2 bg-blue-500 dark:bg-blue-700 text-white rounded-r-md focus:outline-none focus:shadow-outline-blue hover:bg-blue-600 dark:hover:bg-blue-800">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            
+            <script>
+                function copyToClipboard() {
+                    const input = document.querySelector('input#qr_code_url_link');
+                    input.select();
+                    document.execCommand('copy');
+                }
+            </script>
+            
         </x-slot>
 
         <x-slot name="footer">

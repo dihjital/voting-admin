@@ -2,7 +2,9 @@
 
 namespace App\Http\Livewire;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+
 use Laravel\Jetstream\InteractsWithBanner;
 
 use Livewire\Component;
@@ -24,13 +26,13 @@ class ShowOneQuestion extends Component
     public $votes;
     public $vote_id;
     public $vote_text;
+    
+    public $reset_number_of_votes = false; // if set to true, updating a vote will reset the number_of_votes to 0 
 
     // Modal controllers
     public $confirm_delete = false;
     public $update_vote = false;
     public $new_vote = false;
-
-    const URL = 'http://localhost:8000';
 
     protected $rules = [
         'vote_text' => 'required|min:6',
@@ -49,11 +51,6 @@ class ShowOneQuestion extends Component
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
-    }
-
-    public static function getURL(): string
-    {
-        return env('API_ENDPOINT', self::URL);
     }
 
     public function closedColor($button = 'modify')
@@ -85,7 +82,9 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->get(self::getURL().'/questions/'.$this->question_id.'/votes')
+                ->get(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id.'/votes')
                 ->throwUnlessStatus(200);
 
             $this->votes = $response->json();
@@ -98,7 +97,9 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->get(self::getURL().'/questions/'.$this->question_id)
+                ->get(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id)
                 ->throwUnlessStatus(200);
             
             $this->question_text = $response->json()['question_text'];
@@ -135,7 +136,9 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->get(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+                ->get(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
             
             $this->vote_text = $response->json()['vote_text'];
@@ -163,7 +166,9 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->patch(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+                ->patch(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Successful vote'));
@@ -185,7 +190,9 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->post(self::getURL().'/questions/'.$this->question_id.'/votes', [
+                ->post(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id.'/votes', [
                     'vote_text' => $this->vote_text,
                     'number_of_votes' => 0,
                 ])
@@ -215,9 +222,11 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->put(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id, [
+                ->put(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id.'/votes/'.$vote_id, [
                     'vote_text' => $this->vote_text,
-                    'number_of_votes' => 0,
+                    'number_of_votes' => $this->reset_number_of_votes ? 0 : null, // if it is set to null then do not reset ...
                 ])
                 ->throwUnlessStatus(200);
 
@@ -227,6 +236,7 @@ class ShowOneQuestion extends Component
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
+        $this->reset_number_of_votes = false; // Default value
         $this->update_vote = ! $this->update_vote;
     }
 
@@ -243,7 +253,9 @@ class ShowOneQuestion extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->delete(self::getURL().'/questions/'.$this->question_id.'/votes/'.$vote_id)
+                ->delete(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/questions/'.$this->question_id.'/votes/'.$vote_id)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Vote successfully deleted'));

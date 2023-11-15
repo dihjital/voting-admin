@@ -14,6 +14,18 @@ return [
     |
     */
 
+    'api' => [
+        'user' => env('API_USER'),
+        'secret' => env('API_SECRET'),
+        'endpoint' => env('API_ENDPOINT'),
+    ],
+
+    'passport' => [
+        'client_id' => env('PASSPORT_CLIENT_ID'),
+        'client_secret' => env('PASSPORT_CLIENT_SECRET'),
+        'token_endpoint' => env('PASSPORT_TOKEN_ENDPOINT'),
+    ],
+
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),

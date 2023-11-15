@@ -9,6 +9,7 @@ use App\Http\Livewire\Traits\WithErrorMessage;
 use App\Http\Livewire\Traits\WithPerPagePagination;
 use App\Http\Livewire\Traits\WithUUIDSession;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 

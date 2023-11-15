@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use App\Events\UserChanged;
 use App\Listeners\LogRegisteredUser;
 use App\Listeners\ProcessUserChanged;
+use App\Listeners\UserLogoutListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         UserChanged::class => [
             ProcessUserChanged::class,
+        ],
+        'Illuminate\Auth\Events\Logout' => [
+            UserLogoutListener::class,
         ],
     ];
 

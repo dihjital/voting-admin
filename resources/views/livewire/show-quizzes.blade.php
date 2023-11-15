@@ -88,6 +88,7 @@
                 <button onclick="copyToClipboard()" class="px-4 py-2 bg-blue-500 dark:bg-blue-700 text-white rounded-r-md focus:outline-none focus:shadow-outline-blue hover:bg-blue-600 dark:hover:bg-blue-800">
                     <i class="fas fa-copy"></i>
                 </button>
+                <span id="copied_to_clipboard" class="flex ml-2 hidden text-sm text-gray-400 justify-center items-center">{{ __('Copied') }}</span>
             </div>
             
             <script>
@@ -95,6 +96,16 @@
                     const input = document.querySelector('input#qr_code_url_link');
                     input.select();
                     document.execCommand('copy');
+
+                    let copiedToClipboard = document.getElementById('copied_to_clipboard');
+
+                    // Remove the 'hidden' class
+                    copiedToClipboard.classList.remove('hidden');
+                        
+                    // Put the 'hidden' class back after another 2 seconds
+                    setTimeout(function() {
+                        copiedToClipboard.classList.add('hidden');
+                    }, 1000);
                 }
             </script>
             

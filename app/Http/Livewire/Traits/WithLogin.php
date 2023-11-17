@@ -149,15 +149,25 @@ trait WithLogin
 
     protected function retryCallback(\Exception $e, PendingRequest $request) 
     {
+        if ($e instanceof RequestException && $e->response->status() === 419) {
+            // Session expired and the session id is stuck ...
+            $this->deleteSessionId();
+            return true;
+        }
+
         if (! $e instanceof RequestException || !in_array($e->response->status(), [401, 403])) {
             Log::debug('Request failed with status code: '.$e->response->status());
             return false;
         }
     
         Log::debug('Request retry in progress');
-    
+        Log::debug('Session id is: '.$this->session_id);
+        
         if ($this->isTokenValid($this->access_token)) {
-            return false;
+            // Make sure we use a valid token ...
+            $request->withToken($this->access_token);
+
+            return true; // If true then it will retry again ...
         }
     
         $this->getNewTokenFromApi();

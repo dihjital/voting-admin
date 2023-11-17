@@ -87,9 +87,13 @@ trait WithUUIDSession
                 }
             
                 Log::debug('requestNewSessionId: Request retry in progress ...');
+                Log::debug('Session id is: '.$this->session_id);
             
                 if ($this->isTokenValid($this->access_token)) {
-                    return false;
+                    // Make sure we use a valid token ...
+                    $request->withToken($this->access_token);
+
+                    return true; // If true then it will retry again ...
                 }
             
                 $this->getNewTokenFromApi();

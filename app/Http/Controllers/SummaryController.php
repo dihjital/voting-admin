@@ -16,8 +16,6 @@ class SummaryController extends BaseController
 {
     use WithLogin, WithUUIDSession;
 
-    const URL = 'http://localhost:8000';
-
     function display()
     {
         list(
@@ -34,15 +32,13 @@ class SummaryController extends BaseController
             ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                 return $this->retryCallback($e, $request);
             })
-            ->get(env('API_ENDPOINT').'/summary');
+            ->get(config('services.api.endpoint',
+                    fn() => throw new \Exception('No API endpoint is defined')
+                ).'/summary'
+            );
 
         return $result->ok()
             ? view('dashboard', ['results' => (object) $result->json()])
             : view('dashboard');
-    }
-
-    public static function getURL(): string
-    {
-        return env('API_ENDPOINT', self::URL);
     }
 }

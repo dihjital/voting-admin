@@ -74,20 +74,12 @@ trait WithUUIDSession
     {
         $response = Http::withToken($access_token)
             ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
-                if ($e instanceof RequestException && $e->response->status() === 419) {
-                    // Session expired and the session id is stuck ...
-                    Log::debug('requestNewSessionId: Session id expired: '.$this->session_id);
-                    $this->deleteSessionId();
-                    return true;
-                }
-
                 if (! $e instanceof RequestException || !in_array($e->response->status(), [401, 403])) {
                     Log::debug('requestNewSessionId: Request failed with status code: '.$e->response->status());
                     return false;
                 }
             
                 Log::debug('requestNewSessionId: Request retry in progress ...');
-                Log::debug('Session id is: '.$this->session_id);
             
                 if ($this->isTokenValid($this->access_token)) {
                     // Make sure we use a valid token ...

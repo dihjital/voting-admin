@@ -25,6 +25,7 @@ class SummaryController extends BaseController
 
         $this->session_id = $this->startSessionIfRequired($this->access_token);
 
+        // TODO: Add a try ... catch block here
         $result = Http::withToken($this->access_token)
             ->withHeaders([
                 'session-id' => $this->session_id,
@@ -35,7 +36,8 @@ class SummaryController extends BaseController
             ->get(config('services.api.endpoint',
                     fn() => throw new \Exception('No API endpoint is defined')
                 ).'/summary'
-            );
+            )
+            ->throwUnlessStatus(200);
 
         return $result->ok()
             ? view('dashboard', ['results' => (object) $result->json()])

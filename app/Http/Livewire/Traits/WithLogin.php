@@ -152,11 +152,16 @@ trait WithLogin
         if ($e instanceof RequestException && $e->response->status() === 419) {
             // Session expired and the session id is stuck ...
             Log::debug('Session id expired: '.$this->session_id);
+
             $this->deleteSessionId();
+            $this->session_id = $this->startSessionIfRequired($this->access_token);
+
+            $request->withHeaders(['session-id' => $this->session_id]);
+
             return true;
         }
 
-        if (! $e instanceof RequestException || !in_array($e->response->status(), [401, 403])) {
+        if (! $e instanceof RequestException || ! in_array($e->response->status(), [401, 403])) {
             Log::debug('Request failed with status code: '.$e->response->status());
             return false;
         }
@@ -174,6 +179,7 @@ trait WithLogin
         $this->getNewTokenFromApi();
         $this->storeTokensInCache();
     
+        // Start a new session with the new token ...
         $this->deleteSessionId();
         $this->session_id = $this->startSessionIfRequired($this->access_token);
     

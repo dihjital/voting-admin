@@ -151,6 +151,7 @@ trait WithLogin
     {
         if ($e instanceof RequestException && $e->response->status() === 419) {
             // Session expired and the session id is stuck ...
+            Log::debug('Session id expired: '.$this->session_id);
             $this->deleteSessionId();
             return true;
         }
@@ -160,7 +161,7 @@ trait WithLogin
             return false;
         }
     
-        Log::debug('Request retry in progress');
+        Log::debug('Request retry in progress ...');
         Log::debug('Session id is: '.$this->session_id);
         
         if ($this->isTokenValid($this->access_token)) {

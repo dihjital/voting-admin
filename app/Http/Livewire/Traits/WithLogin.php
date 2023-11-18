@@ -153,7 +153,7 @@ trait WithLogin
             // Session expired and the session id is stuck ...
             Log::debug('Session id expired: '.$this->session_id);
 
-            $this->deleteSessionId();
+            $this->deleteSession();
             $this->session_id = $this->startSessionIfRequired($this->access_token);
 
             $request->withHeaders(['session-id' => $this->session_id]);

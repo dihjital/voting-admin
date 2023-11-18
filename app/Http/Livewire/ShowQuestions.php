@@ -36,7 +36,6 @@ class ShowQuestions extends Component
     public $update_question = false;
     public $new_question = false;
 
-    const URL = 'http://localhost:8000';
     const PAGINATING = TRUE;
 
     protected $rules = [
@@ -58,11 +57,6 @@ class ShowQuestions extends Component
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
-    }
-
-    public static function getURL(): string
-    {
-        return env('API_ENDPOINT', self::URL);
     }
 
     public static function getPAGINATING(): bool
@@ -87,8 +81,11 @@ class ShowQuestions extends Component
     public function openQuestion($question_id, $is_closed)
     {
         // Open or close the selected Question ...
-        // TODO: Move this to mandatory session-id check at the back-end
         try {
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/questions/'.$question_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id,
@@ -96,7 +93,7 @@ class ShowQuestions extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->patch(self::getURL().'/questions/'.$question_id, [
+                ->patch($url, [
                     'is_closed' => ! $is_closed,
                 ])
                 ->throwUnlessStatus(200);
@@ -157,9 +154,13 @@ class ShowQuestions extends Component
 
         $this->update_question = ! $this->update_question;
         $this->question_id = $question_id;
-        
+
+        // Get the selected question text...
         try {
-            // Get the selected question text...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/questions/'.$this->question_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id,
@@ -167,7 +168,7 @@ class ShowQuestions extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->get(self::getURL().'/questions/'.$this->question_id)
+                ->get($url)
                 ->throwUnlessStatus(200);
 
             $this->question_text = $response->json()['question_text'];
@@ -180,8 +181,12 @@ class ShowQuestions extends Component
     {
         $this->validate();
 
+        // Create a new question ...
         try {
-            // Create a new question ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/questions';
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
@@ -189,7 +194,7 @@ class ShowQuestions extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->post(self::getURL().'/questions', [
+                ->post($url, [
                     'question_text' => $this->question_text,
                     'quiz_id' => $this->quiz_id ?? null,
                 ])
@@ -210,8 +215,12 @@ class ShowQuestions extends Component
 
         $this->validate();
 
+        // Update the selected vote ...
         try {
-            // Update the selected vote ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/questions/'.$this->question_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
@@ -219,7 +228,7 @@ class ShowQuestions extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->put(self::getURL().'/questions/'.$this->question_id, [
+                ->put($url, [
                     'question_text' => $this->question_text,
                 ])
                 ->throwUnlessStatus(200);
@@ -237,8 +246,12 @@ class ShowQuestions extends Component
     {
         $question_id ??= $this->question_id;
 
+        // Delete the selected vote ...
         try {
-            // Delete the selected vote ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/questions/'.$this->question_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
@@ -246,7 +259,7 @@ class ShowQuestions extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->delete(self::getURL().'/questions/'.$this->question_id)
+                ->delete($url)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully deleted'));
@@ -260,9 +273,12 @@ class ShowQuestions extends Component
     public function fetchData($page = null)
     {
         try {
+            $endpoint = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            );
             $url = $this->quiz_id
-                ? self::getURL().'/quizzes/'.$this->quiz_id.'/questions'
-                : self::getURL().'/questions';
+                ? $endpoint.'/quizzes/'.$this->quiz_id.'/questions'
+                : $endpoint.'/questions';
             
             $response = Http::withToken($this->access_token)
                 ->withHeaders([

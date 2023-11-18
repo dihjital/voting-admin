@@ -33,7 +33,6 @@ class ShowQuizzes extends Component
     public $update_quiz = false;
     public $new_quiz = false;
 
-    const URL = 'http://localhost:8000';
     const PAGINATING = TRUE;
 
     protected $rules = [
@@ -47,15 +46,11 @@ class ShowQuizzes extends Component
                 'access_token' => $this->access_token,
                 'refresh_token' => $this->refresh_token
             ) = $this->getTokensFromCache();
+
             $this->session_id = $this->startSessionIfRequired($this->access_token);
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
-    }
-
-    public static function getURL(): string
-    {
-        return env('API_ENDPOINT', self::URL);
     }
 
     public static function getPAGINATING(): bool
@@ -130,9 +125,13 @@ class ShowQuizzes extends Component
 
         $this->update_quiz = ! $this->update_quiz;
         $this->quiz_id = $quiz_id;
-        
+
+        // Get the selected Quiz name ...
         try {
-            // Get the selected Quiz name ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/quizzes/'.$this->quiz_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id,
@@ -140,7 +139,7 @@ class ShowQuizzes extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->get(self::getURL().'/quizzes/'.$this->quiz_id)
+                ->get($url)
                 ->throwUnlessStatus(200);
 
             $this->name = $response->json()['name'];
@@ -153,8 +152,12 @@ class ShowQuizzes extends Component
     {
         $this->validate();
 
+        // Create a new Quiz ...
         try {
-            // Create a new Quiz ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/quizzes';
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
@@ -162,7 +165,7 @@ class ShowQuizzes extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->post(self::getURL().'/quizzes', [
+                ->post($url, [
                     'name' => $this->name,
                 ])
                 ->throwUnlessStatus(201);
@@ -182,8 +185,12 @@ class ShowQuizzes extends Component
 
         $this->validate();
 
+        // Update the selected Quiz ...
         try {
-            // Update the selected Quiz ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/quizzes/'.$quiz_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
@@ -191,7 +198,7 @@ class ShowQuizzes extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->put(self::getURL().'/quizzes/'.$quiz_id, [
+                ->put($url, [
                     'name' => $this->name,
                 ])
                 ->throwUnlessStatus(200);
@@ -209,8 +216,12 @@ class ShowQuizzes extends Component
     {
         $quiz_id ??= $this->quiz_id;
 
+        // Delete the selected Quiz ...
         try {
-            // Delete the selected Quiz ...
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/quizzes/'.$quiz_id;
+
             $response = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id
@@ -218,7 +229,7 @@ class ShowQuizzes extends Component
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
                 })
-                ->delete(self::getURL().'/quizzes/'.$quiz_id)
+                ->delete($url)
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Quiz deleted successfully'));
@@ -232,7 +243,9 @@ class ShowQuizzes extends Component
     public function fetchData($page = null)
     {
         try {
-            $url = self::getURL().'/quizzes';
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/quizzes';
             
             $response = Http::withToken($this->access_token)
                 ->withHeaders([

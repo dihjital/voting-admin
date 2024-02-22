@@ -90,8 +90,7 @@
 
         <x-slot name="content">
             {{ __('Please enter the text for the new vote option. This action will create a new vote option for the selected question and initiates the number of votes to 0.') }}
-
-            <div class="mt-4" x-data="{}" x-on:confirming-vote-create.window="setTimeout(() => $refs.vote_text.focus(), 250)">
+            <div class="mt-4 mb-4" x-data="{}" x-on:confirming-vote-create.window="setTimeout(() => $refs.vote_text.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"
                             autocomplete=""
                             placeholder="{{ old('$vote_text') }}"
@@ -100,6 +99,22 @@
                             wire:keydown.enter="create" />
 
                 <x-input-error for="vote_text" class="mt-2" />
+            </div>
+
+            {{ __('Optionally you can upload an image for each vote. The image will be shown to the voters on the client.') }}
+            <div class="mt-4 space-y-4">
+                @if ($vote_image)
+                    {{ __('Photo Preview:') }}
+                    <div class="w-32 h-32 overflow-hidden border-2 border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50">
+                        <img class="object-cover w-full h-full" src="{{ $vote_image->temporaryUrl() }}" alt="Thumbnail">
+                    </div>
+                @endif
+                <x-input type="file" class="mt-1 block w-3/4"
+                            placeholder="{{ __('Please select an image for uploading') }}"
+                            accept="image/png, image/jpeg, image/jpg, image/gif"
+                            wire:model.defer="vote_image" />
+
+                <x-input-error for="vote_image" class="mt-2" />
             </div>
         </x-slot>
 

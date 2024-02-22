@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Laravel\Jetstream\InteractsWithBanner;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 use App\Http\Livewire\Traits\WithLogin;
 use App\Http\Livewire\Traits\WithUUIDSession;
@@ -18,6 +19,7 @@ use Illuminate\Http\Client\PendingRequest;
 class ShowOneQuestion extends Component
 {
     use InteractsWithBanner, WithErrorMessage, WithLogin, WithUUIDSession;
+    use WithFileUploads;
 
     public $question_id;
     public $question_text;
@@ -26,6 +28,7 @@ class ShowOneQuestion extends Component
     public $votes;
     public $vote_id;
     public $vote_text;
+    public $vote_image;
     
     public $reset_number_of_votes = false; // if set to true, updating a vote will reset the number_of_votes to 0 
 
@@ -36,6 +39,7 @@ class ShowOneQuestion extends Component
 
     protected $rules = [
         'vote_text' => 'required|min:6',
+        'vote_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ];
 
     public function mount($question_id)
@@ -196,18 +200,30 @@ class ShowOneQuestion extends Component
                 fn() => throw new \Exception('No API endpoint is defined')
             ).'/questions/'.$this->question_id.'/votes';
 
-            $response = Http::withToken($this->access_token)
+            $request = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
-                })
-                ->post($url, [
-                    'vote_text' => $this->vote_text,
-                    'number_of_votes' => 0,
-                ])
-                ->throwUnlessStatus(201);
+                });
+
+            if ($this->vote_image) {
+                $request
+                    ->attach(
+                        'image',
+                        file_get_contents($this->vote_image->path()),
+                        $this->vote_image->getClientOriginalName()
+                    );
+            }
+
+            $response = 
+                $request
+                    ->post($url, [
+                        'vote_text' => $this->vote_text,
+                        'number_of_votes' => 0,
+                    ])
+                    ->throwUnlessStatus(201);
 
             $this->banner(__('Vote successfully created'));
             $this->emit('confirming-vote-create');

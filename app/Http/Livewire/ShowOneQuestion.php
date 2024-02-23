@@ -164,6 +164,7 @@ class ShowOneQuestion extends Component
         $this->resetValidation();
 
         $this->vote_text = '';
+        $this->vote_image = null;
         $this->new_vote = ! $this->new_vote;
     }
 

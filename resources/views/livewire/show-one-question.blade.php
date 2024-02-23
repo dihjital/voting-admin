@@ -109,7 +109,13 @@
                         <img class="object-cover w-full h-full" src="{{ $vote_image->temporaryUrl() }}" alt="Thumbnail">
                     </div>
                 @endif
-                <x-input type="file" class="mt-1 block w-3/4"
+                <x-input type="file" id="vote_image" 
+                            class="mt-1 block w-3/4 h-9 
+                            rounded-md border border-input bg-background px-3 py-1 
+                            text-sm shadow-sm transition-colors 
+                            file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium 
+                            placeholder:text-muted-foreground 
+                            focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600"
                             placeholder="{{ __('Please select an image for uploading') }}"
                             accept="image/png, image/jpeg, image/jpg, image/gif"
                             wire:model.defer="vote_image" />

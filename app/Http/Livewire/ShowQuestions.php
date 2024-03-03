@@ -28,6 +28,7 @@ class ShowQuestions extends Component
 
     public $question_id;
     public $question_text;
+    public $question_close_at;
 
     public $quiz_id;
 
@@ -41,7 +42,17 @@ class ShowQuestions extends Component
     protected $rules = [
         'question_text' => 'required|min:6',
         // 'is_closed' => 'nullable|boolean', Should add a property as well to the model
+        'question_close_at' => 'nullable|date',
     ];
+
+    protected $listeners = [
+        'closeAtDateSelected' => 'setCloseAtDate',
+    ];
+
+    public function setCloseAtDate($date)
+    {
+        $this->question_close_at = $date;
+    }
 
     public function mount($quiz_id = null)
     {
@@ -138,6 +149,8 @@ class ShowQuestions extends Component
         $this->resetValidation();
 
         $this->question_text = '';
+        $this->question_close_at = null;
+        
         $this->new_question = ! $this->new_question;
     }
 
@@ -196,6 +209,7 @@ class ShowQuestions extends Component
                 })
                 ->post($url, [
                     'question_text' => $this->question_text,
+                    'closed_at' => $this->question_close_at ?? null,
                     'quiz_id' => $this->quiz_id ?? null,
                 ])
                 ->throwUnlessStatus(201);
@@ -230,6 +244,7 @@ class ShowQuestions extends Component
                 })
                 ->put($url, [
                     'question_text' => $this->question_text,
+                    'closed_at' => $this->question_close_at ?? null,
                 ])
                 ->throwUnlessStatus(200);
 

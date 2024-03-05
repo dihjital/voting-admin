@@ -5,6 +5,10 @@
     @if($this->hasErrorMessage())
         <x-error-page code="{{ $this->getStatusCode() }}" message="{{ $this->getErrorMessage() }}"></x-error-page>
     @else
+    <!-- Filters section -->
+    <x-toggle checked wire:model="filters.quizzes">{{ __('Show quizzes') }}</x-toggle>
+    <x-toggle checked wire:model="filters.closed">{{ __('Show closed') }}</x-toggle>
+
     <x-table>
         <x-slot name="head">
             <x-table.heading class="w-1/12">#</x-table.heading>

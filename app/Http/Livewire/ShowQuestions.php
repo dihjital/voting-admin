@@ -12,6 +12,7 @@ use App\Http\Livewire\Traits\WithUUIDSession;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 use Laravel\Jetstream\InteractsWithBanner;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -37,6 +38,11 @@ class ShowQuestions extends Component
     public $update_question = false;
     public $new_question = false;
 
+    public $filters = [
+        'closed' => true,
+        'quizzes' => true,
+    ];
+
     const PAGINATING = TRUE;
 
     protected $rules = [
@@ -54,10 +60,25 @@ class ShowQuestions extends Component
         $this->question_close_at = $date;
     }
 
+    protected function initializeFiltering()
+    {
+        $filters = session()->get('showQuestions.filters', $this->filters);
+        foreach($filters as $key => $value) {
+            $this->filters[$key] = $value;
+        }
+    }
+
+    public function updatedFilters($value, $key)
+    {
+        session()->put('showQuestions.filters', $this->filters);
+    }
+
     public function mount($quiz_id = null)
     {
         // It will only assing $quiz_id to the public variable if the public variable is null ...
         $this->quiz_id ??= $quiz_id;
+
+        $this->initializeFiltering();
 
         try {
             list(
@@ -304,6 +325,8 @@ class ShowQuestions extends Component
                 })
                 ->get($url, array_filter([
                     'page' => self::getPAGINATING() ? $page ?? request('page', 1) : '',
+                    'closed' => $this->filters['closed'] ?? null,
+                    'quizzes' => $this->filters['quizzes'] ?? null,
                 ]))
                 ->throwUnlessStatus(200);
 

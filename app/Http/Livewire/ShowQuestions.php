@@ -131,7 +131,7 @@ class ShowQuestions extends Component
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully updated'));
-            $this->emit('confirming-question-text-update');
+            $this->emit('confirming-question-update');
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
@@ -170,7 +170,7 @@ class ShowQuestions extends Component
         $this->resetValidation();
 
         $this->question_text = '';
-        $this->question_close_at = null;
+        $this->question_close_at = '';
         
         $this->new_question = ! $this->new_question;
     }
@@ -206,6 +206,7 @@ class ShowQuestions extends Component
                 ->throwUnlessStatus(200);
 
             $this->question_text = $response->json()['question_text'];
+            $this->question_close_at = $response->json()['closed_at'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
@@ -270,7 +271,7 @@ class ShowQuestions extends Component
                 ->throwUnlessStatus(200);
 
             $this->banner(__('Question successfully updated'));
-            $this->emit('confirming-question-text-update');
+            $this->emit('confirming-question-update');
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }

@@ -12,7 +12,6 @@ use App\Http\Livewire\Traits\WithUUIDSession;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 use Laravel\Jetstream\InteractsWithBanner;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -20,6 +19,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Client\PendingRequest;
 
 use Livewire\Component;
+
+use Carbon\Carbon;
 
 class ShowQuestions extends Component
 {
@@ -29,7 +30,7 @@ class ShowQuestions extends Component
 
     public $question_id;
     public $question_text;
-    public $question_close_at;
+    public $question_close_at = null;
 
     public $quiz_id;
 
@@ -51,15 +52,6 @@ class ShowQuestions extends Component
         'question_close_at' => 'nullable|date',
     ];
 
-    protected $listeners = [
-        'closeAtDateSelected' => 'setCloseAtDate',
-    ];
-
-    public function setCloseAtDate($date)
-    {
-        $this->question_close_at = $date;
-    }
-
     protected function initializeFiltering()
     {
         $filters = session()->get('showQuestions.filters', $this->filters);
@@ -71,6 +63,12 @@ class ShowQuestions extends Component
     public function updatedFilters($value, $key)
     {
         session()->put('showQuestions.filters', $this->filters);
+    }
+
+    public function updatedQuestionCloseAt($value)
+    {
+        // Flowbite DatePicker is sending back "" even if the DatePicker value is undefined ... 
+        $this->question_close_at = $value === "" ? null : $value;
     }
 
     public function mount($quiz_id = null)
@@ -170,7 +168,7 @@ class ShowQuestions extends Component
         $this->resetValidation();
 
         $this->question_text = '';
-        $this->question_close_at = '';
+        $this->question_close_at = null;
         
         $this->new_question = ! $this->new_question;
     }
@@ -206,7 +204,11 @@ class ShowQuestions extends Component
                 ->throwUnlessStatus(200);
 
             $this->question_text = $response->json()['question_text'];
-            $this->question_close_at = $response->json()['closed_at'];
+
+            $closed_at = $response->json()['closed_at'];
+            $this->question_close_at = $closed_at
+                ? Carbon::parse($closed_at)->format('m/d/Y')
+                : null;
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }

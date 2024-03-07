@@ -37,9 +37,9 @@
                     @if($q['closed_at'])
                         <p class="italic text-xs">
                         @if($q['is_closed'] && $q['closed_at'] < now())
-                            {{ __('This question was automatically closed at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('Y-m-d')] )}}
+                            {{ __('This question was automatically closed at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('d/m/Y')] )}}
                         @else
-                            {{ __('This question was set to automatically close at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('Y-m-d')] )}}
+                            {{ __('This question was set to automatically close at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('d/m/Y')] )}}
                         @endif
                         </p>
                     @endif      
@@ -87,7 +87,7 @@
     @endif
 
     <!-- QR Code Modal -->
-    <x-dialog-modal wire:model="results_qrcode" maxWidth="lg">
+    <x-dialog-modal wire:model.defer="results_qrcode" maxWidth="lg">
         <x-slot name="title">
             {{ __('QR Code for voting') }}
         </x-slot>
@@ -113,7 +113,7 @@
     </x-dialog-modal>
 
     <!-- Create New Question Modal -->
-    <x-dialog-modal wire:model="new_question">
+    <x-dialog-modal wire:model.defer="new_question">
         <x-slot name="title">
             {{ __('Create Question') }}
         </x-slot>
@@ -145,8 +145,9 @@
                             todayHighlight: true,
                         });
                         datepickerEl.addEventListener('changeDate', (event) => {
-                            event.detail.date &&
-                                window.livewire.emit('closeAtDateSelected', event.detail.date.toDateString());
+                            event.detail.date
+                                ? window.livewire.emit('closeAtDateSelected', event.detail.date.toDateString())
+                                : window.livewire.emit('closeAtDateSelected', null);
                         });"
                 x-on:confirming-question-create.window="setTimeout(() => $refs.question_close_at.focus(), 250)">
                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -156,6 +157,7 @@
                 </div>
                 <input 
                     datepicker
+                    value=""
                     id="question_close_at"
                     type="text"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -178,7 +180,7 @@
     </x-dialog-modal>
 
     <!-- Update Question Modal -->
-    <x-dialog-modal wire:model="update_question">
+    <x-dialog-modal wire:model.defer="update_question">
         <x-slot name="title">
             {{ __('Update Question') }}
         </x-slot>
@@ -200,8 +202,8 @@
             {{ __('You can specify a date when the question should be closed automatically by the system.') }}
             <div 
                 class="relative w-3/4 mt-4"
-                x-init="const datepickerEl = document.getElementById('update_question_close_at');
-                        new Datepicker(datepickerEl, {
+                x-init="const datepickerUEl = document.getElementById('update_question_close_at');
+                        new Datepicker(datepickerUEl, {
                             autohide: true,
                             orientation: 'right',
                             format: 'mm/dd/yyyy',
@@ -209,7 +211,7 @@
                             todayBtn: true,
                             todayHighlight: true,
                         });
-                        datepickerEl.addEventListener('changeDate', (event) => {
+                        datepickerUEl.addEventListener('changeDate', (event) => {
                             event.detail.date
                                 ? window.livewire.emit('closeAtDateSelected', event.detail.date.toDateString())
                                 : window.livewire.emit('closeAtDateSelected', null);
@@ -227,9 +229,10 @@
                     type="text"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="{{ __('Select date') }}"
-                    x-ref="question_close_at" />
+                    x-ref="update_question_close_at" />
                 
                 <x-input-error for="update_question_close_at" class="mt-2" />
+            </div>
         </x-slot>
 
         <x-slot name="footer">
@@ -244,7 +247,7 @@
     </x-dialog-modal>
 
     <!-- Delete Question Confirmation Modal -->
-    <x-dialog-modal wire:model="confirm_delete">
+    <x-dialog-modal wire:model.defer="confirm_delete">
         <x-slot name="title">
             {{ __('Delete Question') }}
         </x-slot>

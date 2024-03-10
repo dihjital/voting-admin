@@ -37,9 +37,9 @@
                     @if($q['closed_at'])
                         <p class="italic text-xs">
                         @if($q['is_closed'] && $q['closed_at'] < now())
-                            {{ __('This question was automatically closed at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('m/d/Y')] )}}
+                            {{ __('This question was automatically closed at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('m/d/Y')]) }}
                         @else
-                            {{ __('This question was set to automatically close at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('m/d/Y')] )}}
+                            {{ __('This question was set to automatically close at: :closeAt', ['closeAt' => Carbon\Carbon::parse($q['closed_at'])->format('m/d/Y')]) }}
                         @endif
                         </p>
                     @endif      
@@ -135,6 +135,7 @@
             {{ __('You can specify a date when the question should be closed automatically by the system.') }}
             <div class="relative w-3/4 mt-4" x-data="{}" x-on:confirming-question-create.window="setTimeout(() => $refs.question_close_at.focus(), 250)">
                 <x-date-picker wire:model.defer="question_close_at" id="question_close_at" /> 
+                <!-- TODO: Error message is breaking the display //-->
                 <x-input-error for="question_close_at" class="mt-2" />
             </div>
         </x-slot>
@@ -173,6 +174,7 @@
             {{ __('You can specify a date when the question should be closed automatically by the system.') }}
             <div class="relative w-3/4 mt-4" x-data="{}" x-on:confirming-question-update.window="setTimeout(() => $refs.question_close_at.focus(), 250)">
                 <x-date-picker wire:model.defer="question_close_at" id="question_close_at" /> 
+                <!-- TODO: Error message is breaking the display //-->
                 <x-input-error for="question_close_at" class="mt-2" />
             </div>
         </x-slot>

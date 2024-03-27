@@ -46,7 +46,14 @@
         <x-slot name="body">
             @forelse($votes as $v)
             <x-table.row wire:loading.class.delay="opacity-75" wire:key="row-{{ $v['id'] }}">
-                <x-table.cell>{{ $v['id'] }}</x-table.cell>
+                <x-table.cell>
+                    {{ $v['id'] }}
+                    @if($v['image_path'])
+                        <a href="#" wire:click="toggleShowImageModal({{ $v['id'] }})">
+                            <i class="fas fa-paperclip fa-sm ml-2" aria-hidden="true" title="{{ $v['vote_text'] }}"></i>
+                        </a>
+                    @endif
+                </x-table.cell>
                 <x-table.cell class="space-y-2">
                     <div>{{ $v['vote_text'] }}</div>
                     <div wire:key="bar-id-{{ $v['id'] }}" id="bar-id-{{ $v['id'] }}">
@@ -198,6 +205,23 @@
             <x-danger-button class="ml-3" wire:click="delete({{ $vote_id }})" wire:loading.attr="disabled">
                 {{ __('Delete Vote') }}
             </x-danger-button>
+        </x-slot>
+    </x-dialog-modal>
+
+    <!-- Show Vote image -->
+    <x-dialog-modal wire:model="show_image">
+        <x-slot name="title">
+            {{ __('Showing image for ":voteText" vote', ['voteText' => $vote_text]) }}
+        </x-slot>
+        <x-slot name="content">
+            <div class="w-full flex justify-center mb-2 overflow-hidden border-2 border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50">
+                <img class="h-96 object-scale-down transition duration-300 ease-in-out hover:scale-125" src="{{ $image_url }}" alt="{{ $vote_text }}">
+            </div>                                           
+        </x-slot>
+        <x-slot name="footer">
+            <x-secondary-button wire:click="$toggle('show_image')" wire:loading.attr="disabled">
+                {{ __('OK') }}
+            </x-secondary-button>
         </x-slot>
     </x-dialog-modal>
 

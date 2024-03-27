@@ -29,6 +29,7 @@ class ShowOneQuestion extends Component
     public $vote_id;
     public $vote_text;
     public $vote_image;
+    public $image_url;
     
     public $reset_number_of_votes = false; // if set to true, updating a vote will reset the number_of_votes to 0 
 
@@ -36,6 +37,7 @@ class ShowOneQuestion extends Component
     public $confirm_delete = false;
     public $update_vote = false;
     public $new_vote = false;
+    public $show_image = false;
 
     protected $rules = [
         'vote_text' => 'required|min:6',
@@ -119,6 +121,38 @@ class ShowOneQuestion extends Component
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
+    }
+
+    public function toggleShowImageModal($vote_id)
+    {
+        if (! $vote_id) return null;
+
+        $this->show_image = ! $this->show_image;
+
+        $vote = array_values(
+            array_map(
+                fn($vote) => [
+                    'vote_text' => $vote['vote_text'], 
+                    'image_url' => $vote['image_url'],
+                ], 
+                array_filter(
+                    $this->votes, 
+                    function($vote) use ($vote_id) {
+                        return $vote['id'] === $vote_id;
+                    }
+                )
+            )
+        );
+
+        list('vote_text' => $this->vote_text, 'image_url' => $this->image_url) = 
+            count($vote) && 
+            array_key_exists('vote_text', $vote[0]) && 
+            array_key_exists('image_url', $vote[0])
+                ? array_pop($vote)
+                : [
+                    'vote_text' => null, 
+                    'image_url' => null,
+                ];
     }
 
     public function toggleDeleteVoteModal($vote_id)

@@ -187,6 +187,7 @@ class ShowOneQuestion extends Component
                 ->throwUnlessStatus(200);
             
             $this->vote_text = $response->json()['vote_text'];
+            $this->image_url = $response->json()['image_url'];
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }

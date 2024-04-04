@@ -111,7 +111,7 @@
             {{ __('Optionally you can upload an image for each vote. The image will be shown to the voters on the client.') }}
             <div class="mt-4 space-y-4">
                 @if ($vote_image)
-                    {{ __('Photo Preview:') }}
+                    {{ __('Photo preview:') }}
                     <div class="w-32 h-32 overflow-hidden border-2 border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50">
                         <img class="object-cover w-full h-full" src="{{ $vote_image->temporaryUrl() }}" alt="Thumbnail">
                     </div>
@@ -150,7 +150,6 @@
 
         <x-slot name="content">
             <p>{{ __('You can modify the text of the selected voting option. This action will set the number of votes to 0 if the Reset number of votes to 0 checkbox is selected.') }}</p>
-            <p class="mt-1">{{ __('Please note that resetting the number of votes to 0 will also remove all locations belonging to this voting option from the database.') }}</p>
 
             <div class="mt-4" x-data="{}" x-on:confirming-vote-text-update.window="setTimeout(() => $refs.vote_text.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"
@@ -173,7 +172,22 @@
                 </label>
             
                 <x-input-error for="reset_number_of_votes" class="mt-2" />
-            </div>            
+            </div>
+            <p class="mt-1">{{ __('Please note that resetting the number of votes to 0 will also remove all locations belonging to this voting option from the database.') }}</p>
+                 
+            @if($image_url)
+            <div class="mt-4 relative border-2 border-gray-400 rounded-lg w-32 h-auto">
+                <img src="{{ $image_url }}" alt="{{ $vote_text }}" />
+                
+                <!-- Close button with hover effect -->
+                <div class="close-button absolute top-0 right-0 dark:bg-gray-400 bg-gray-200 rounded-full p-2 flex items-center justify-center cursor-pointer -mt-4 -mr-4 border-2 border-gray-400 hover:bg-gray-400 dark:hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+            </div>
+            @endif
+
         </x-slot>
 
         <x-slot name="footer">

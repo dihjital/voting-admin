@@ -174,19 +174,41 @@
                 <x-input-error for="reset_number_of_votes" class="mt-2" />
             </div>
             <p class="mt-1">{{ __('Please note that resetting the number of votes to 0 will also remove all locations belonging to this voting option from the database.') }}</p>
-                 
-            @if($image_url)
+           
+            @if(!$vote_image && $image_url)
             <div class="mt-4 relative border-2 border-gray-400 rounded-lg w-32 h-auto">
                 <img src="{{ $image_url }}" alt="{{ $vote_text }}" />
                 
                 <!-- Close button with hover effect -->
-                <div class="close-button absolute top-0 right-0 dark:bg-gray-400 bg-gray-200 rounded-full p-2 flex items-center justify-center cursor-pointer -mt-4 -mr-4 border-2 border-gray-400 hover:bg-gray-400 dark:hover:bg-gray-200">
+                <div wire:click="$set('image_url', null)" class="close-button absolute top-0 right-0 dark:bg-gray-400 bg-gray-200 rounded-full p-2 flex items-center justify-center cursor-pointer -mt-4 -mr-4 border-2 border-gray-400 hover:bg-gray-400 dark:hover:bg-gray-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
             </div>
             @endif
+
+            <p class="mt-2">{{ __('Optionally you can upload an image for each vote. The image will be shown to the voters on the client.') }}</p>
+            <div class="mt-2 space-y-4">
+                @if ($vote_image)
+                    {{ __('Photo preview:') }}
+                    <div class="w-32 h-32 overflow-hidden border-2 border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50">
+                        <img class="object-cover w-full h-full" src="{{ $vote_image->temporaryUrl() }}" alt="Thumbnail">
+                    </div>
+                @endif
+                <x-input type="file" id="vote_image" 
+                            class="mt-1 block w-3/4 h-9 
+                            rounded-md border border-input bg-background px-3 py-1 
+                            text-sm shadow-sm transition-colors 
+                            file:border-0 file:bg-transparent file:text-gray-600 file:dark:text-gray-300 file:text-sm file:font-medium 
+                            placeholder:text-muted-foreground 
+                            focus:border-1 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600"
+                            placeholder="{{ __('Please select an image for uploading') }}"
+                            accept="image/png, image/jpeg, image/jpg, image/gif"
+                            wire:model.defer="vote_image" />
+
+                <x-input-error for="vote_image" class="mt-2" />
+            </div>
 
         </x-slot>
 

@@ -170,6 +170,8 @@ class ShowOneQuestion extends Component
         $this->update_vote = !$this->update_vote;
         $this->vote_id = $vote_id;
 
+        $this->vote_image = null;
+
         // Get the selected vote text...
         try {
             $url = config('services.api.endpoint',
@@ -282,18 +284,31 @@ class ShowOneQuestion extends Component
                 fn() => throw new \Exception('No API endpoint is defined')
             ).'/questions/'.$this->question_id.'/votes/'.$vote_id;
 
-            $response = Http::withToken($this->access_token)
+            $request = Http::withToken($this->access_token)
                 ->withHeaders([
                     'session-id' => $this->session_id,
                 ])
                 ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
                     return $this->retryCallback($e, $request);
-                })
-                ->put($url, [
-                    'vote_text' => $this->vote_text,
-                    'number_of_votes' => $this->reset_number_of_votes ? 0 : null, // if it is set to null then do not reset ...
-                ])
-                ->throwUnlessStatus(200);
+                });
+
+            $payload = [
+                'vote_text' => $this->vote_text,
+                'number_of_votes' => $this->reset_number_of_votes ? 0 : null, // if it is set to null then do not reset ...
+            ];
+
+            if ($this->vote_image) {
+                $request
+                    ->attach(
+                        'image',
+                        file_get_contents($this->vote_image->path()),
+                        $this->vote_image->getClientOriginalName()
+                    );
+            }
+
+            $response = $this->vote_image 
+                ? $request->post($url, $payload)->throwUnlessStatus(200) // Need to post it if we have a file to upload ...
+                : $request->put($url, $payload)->throwUnlessStatus(200);
 
             $this->banner(__('Vote successfully updated'));
             $this->emit('confirming-vote-text-update');

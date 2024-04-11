@@ -348,6 +348,34 @@ class ShowOneQuestion extends Component
         $this->confirm_delete = !$this->confirm_delete;
     }
 
+    public function deleteVoteImage($vote_id) 
+    {
+        $vote_id ??= $this->vote_id;
+
+        // Delete the image attaced to the selected vote ...
+        try {
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ).'/questions/'.$this->question_id.'/votes/'.$vote_id.'/image';
+
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
+                    'session-id' => $this->session_id,
+                ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
+                ->delete($url)
+                ->throwUnlessStatus(200);
+
+            $this->banner(__('Vote image successfully deleted'));
+        } catch (\Exception $e) {
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
+        }
+
+        $this->image_url = null;
+    }
+
     public function render()
     {
         $this->fetchData();

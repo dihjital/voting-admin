@@ -180,7 +180,7 @@
                 <img src="{{ $image_url }}" alt="{{ $vote_text }}" />
                 
                 <!-- Close button with hover effect -->
-                <div wire:click="$set('image_url', null)" class="close-button absolute top-0 right-0 dark:bg-gray-400 bg-gray-200 rounded-full p-2 flex items-center justify-center cursor-pointer -mt-4 -mr-4 border-2 border-gray-400 hover:bg-gray-400 dark:hover:bg-gray-200">
+                <div wire:click="deleteVoteImage( {{ $vote_id }})" class="close-button absolute top-0 right-0 dark:bg-gray-400 bg-gray-200 rounded-full p-2 flex items-center justify-center cursor-pointer -mt-4 -mr-4 border-2 border-gray-400 hover:bg-gray-400 dark:hover:bg-gray-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12" />
                     </svg>

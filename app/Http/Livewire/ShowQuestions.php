@@ -48,7 +48,8 @@ class ShowQuestions extends Component
 
     protected $rules = [
         'question_text' => 'required|min:6',
-        // 'is_closed' => 'nullable|boolean', Should add a property as well to the model
+        // 'is_closed' => 'nullable|boolean', If the new question modal has a toggle for this property
+        // 'is_secure' => 'nullable|boolean', If the new question modal has a toggle for this property
         'question_close_at' => 'nullable|date',
     ];
 
@@ -106,6 +107,33 @@ class ShowQuestions extends Component
                 '1' => 'bg-gray-500 hover:bg-gray-600',
             ],
         ][$button][$is_closed];
+    }
+
+    public function secureQuestion($question_id, $is_secure)
+    {
+        // Secure the selected Question ...
+        try {
+            $url = config('services.api.endpoint',
+                fn() => throw new \Exception('No API endpoint is defined')
+            ) . '/questions/' . $question_id;
+
+            $response = Http::withToken($this->access_token)
+                ->withHeaders([
+                    'session-id' => $this->session_id,
+                ])
+                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                    return $this->retryCallback($e, $request);
+                })
+                ->patch($url, [
+                    'is_secure' => ! $is_secure,
+                ])
+                ->throwUnlessStatus(200);
+
+            $this->banner(__('Question successfully updated'));
+            $this->emit('confirming-question-update');
+        } catch (\Exception $e) {
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
+        }
     }
 
     public function openQuestion($question_id, $is_closed)

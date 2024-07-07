@@ -11,23 +11,25 @@
 
     <x-table>
         <x-slot name="head">
-            <x-table.heading class="w-1/12">#</x-table.heading>
             <x-table.heading class="w-1/12"></x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Question text') }}</x-table.heading>
             <x-table.heading class="w-1/12">{{ __('Closed?') }}</x-table.heading>
-            <x-table.heading class="w-2/12">{{ __('# of answers') }}</x-table.heading>
+            <x-table.heading class="w-1/12">{{ __('Secure?') }}</x-table.heading>
+            <x-table.heading class="w-2/12">{{ __('# of choices') }}</x-table.heading>
             <x-table.heading class="w-1/12"></x-table.heading>
         </x-slot>
         <x-slot name="body">
             @forelse($questions as $q)
             <x-table.row wire:loading.class.delay="opacity-75" wire:key="row-{{ $q['id'] }}">
-                <x-table.cell>{{ $q['id'] }}</x-table.cell>
                 <x-table.cell class="space-x-1">
                     @if($q['belongs_to_quiz'])
                         <i class="fa-solid fa-trophy" title="{{ __('This question belongs to a quiz') }}"></i>
                     @endif
                     @if($q['is_closed'])
                         <i class="fa-solid fa-lock" title="{{ __('This question is closed') }}"></i>
+                    @endif
+                    @if($q['is_secure'])
+                        <i class="fa-solid fa-user-secret" title="{{ __('A valid e-mail is required to vote for this question') }}"></i>
                     @endif
                 </x-table.cell>
                 <x-table.cell>
@@ -47,6 +49,13 @@
                 <x-table.cell>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" wire:click="openQuestion({{ $q['id'] }}, {{ $q['is_closed'] }})" value="" class="sr-only peer" {{ $q['is_closed'] ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
+                    </label>
+                </x-table.cell>
+                <x-table.cell>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" @disabled($q['is_closed']) wire:click="secureQuestion({{ $q['id'] }}, {{ $q['is_secure'] }})" value="" class="sr-only peer" {{ $q['is_secure'] ? 'checked' : '' }}>
                         <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
                         <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
                     </label>

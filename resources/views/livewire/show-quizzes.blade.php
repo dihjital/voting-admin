@@ -7,19 +7,31 @@
     @else
     <x-table>
         <x-slot name="head">
-            <x-table.heading class="w-1/12">#</x-table.heading>
+            <x-table.heading class="w-auto"></x-table.heading>
             <x-table.heading class="w-6/12">{{ __('Quiz text') }}</x-table.heading>
-            <x-table.heading class="w-4/12">{{ __('# of questions') }}</x-table.heading>
-            <x-table.heading class="w-1/12"></x-table.heading>
+            <x-table.heading class="w-auto">{{ __('Secure?') }}</x-table.heading>
+            <x-table.heading class="w-auto">{{ __('# of questions') }}</x-table.heading>
+            <x-table.heading class="w-auto"></x-table.heading>
         </x-slot>
         <x-slot name="body">
             @forelse($quizzes as $q)
             <x-table.row wire:loading.class.delay="opacity-75" wire:key="row-{{ $q['id'] }}">
-                <x-table.cell>{{ $q['id'] }}</x-table.cell>
+                <x-table.cell class="space-x-1">
+                    @if($q['is_secure'] || $q['has_secure_question'])
+                        <i class="fa-solid fa-user-secret" title="{{ __('A valid e-mail is required to vote for this quiz') }}"></i>
+                    @endif
+                </x-table.cell>
                 <x-table.cell>
                     <a href="/quizzes/{{ $q['id'] }}/questions">
                         {{ $q['name'] }}
                     </a>      
+                </x-table.cell>
+                <x-table.cell>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" @disabled($q['has_secure_question']) wire:click="secureQuiz({{ $q['id'] }}, {{ (int) $q['is_secure'] }})" value="" class="sr-only peer" {{ $q['is_secure'] || $q['has_secure_question'] ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                        <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
+                    </label>
                 </x-table.cell>
                 <x-table.cell>{{ $q['number_of_questions'] }}</x-table.cell>
                 <x-table.cell class="text-right text-sm font-medium space-x-2">
@@ -38,7 +50,7 @@
             </x-table.row>
             @empty
             <x-table.row wire:key="row-empty">
-                <x-table.cell colspan="4" class="whitespace-nowrap">
+                <x-table.cell colspan="5" class="whitespace-nowrap">
                     <div class="flex justify-center items-center">
                         <span class="py-8 text-base text-center font-medium text-gray-400 uppercase">{{ __('There are no quizzes in the database') }} ...</span>
                     </div>

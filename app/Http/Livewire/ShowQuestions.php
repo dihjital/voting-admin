@@ -8,6 +8,7 @@ use App\Http\Livewire\Traits\WithLogin;
 use App\Http\Livewire\Traits\WithErrorMessage;
 use App\Http\Livewire\Traits\WithPerPagePagination;
 use App\Http\Livewire\Traits\WithUUIDSession;
+use App\Http\Livewire\Traits\WithRESTApiCalls;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -24,7 +25,12 @@ use Carbon\Carbon;
 
 class ShowQuestions extends Component
 {
-    use InteractsWithBanner, WithErrorMessage, WithPerPagePagination, WithLogin, WithUUIDSession;
+    use InteractsWithBanner;
+    use WithErrorMessage;
+    use WithPerPagePagination;
+    use WithLogin;
+    use WithUUIDSession;
+    use WithRESTApiCalls;
     
     public $error_message;
 
@@ -113,25 +119,12 @@ class ShowQuestions extends Component
     {
         // Secure the selected Question ...
         try {
-            $url = config('services.api.endpoint',
-                fn() => throw new \Exception('No API endpoint is defined')
-            ) . '/questions/' . $question_id;
-
-            $response = Http::withToken($this->access_token)
-                ->withHeaders([
-                    'session-id' => $this->session_id,
-                ])
-                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
-                    return $this->retryCallback($e, $request);
-                })
-                ->patch($url, [
-                    'is_secure' => ! $is_secure,
-                ])
-                ->throwUnlessStatus(200);
+            $this->patchQuestion($question_id, 'is_secure', ! $is_secure);
 
             $this->banner(__('Question successfully updated'));
             $this->emit('confirming-question-update');
         } catch (\Exception $e) {
+            Log::error('Failed to update question: ' . $e->getMessage());
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
@@ -140,25 +133,12 @@ class ShowQuestions extends Component
     {
         // Open or close the selected Question ...
         try {
-            $url = config('services.api.endpoint',
-                fn() => throw new \Exception('No API endpoint is defined')
-            ).'/questions/'.$question_id;
-
-            $response = Http::withToken($this->access_token)
-                ->withHeaders([
-                    'session-id' => $this->session_id,
-                ])
-                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
-                    return $this->retryCallback($e, $request);
-                })
-                ->patch($url, [
-                    'is_closed' => ! $is_closed,
-                ])
-                ->throwUnlessStatus(200);
-
+            $this->patchQuestion($question_id, 'is_closed', ! $is_closed);
+            
             $this->banner(__('Question successfully updated'));
             $this->emit('confirming-question-update');
         } catch (\Exception $e) {
+            Log::error('Failed to update question: ' . $e->getMessage());
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
     }
@@ -313,28 +293,16 @@ class ShowQuestions extends Component
     {
         $question_id ??= $this->question_id;
 
-        // Delete the selected vote ...
+        // Delete the selected question ...
         try {
-            $url = config('services.api.endpoint',
-                fn() => throw new \Exception('No API endpoint is defined')
-            ).'/questions/'.$this->question_id;
-
-            $response = Http::withToken($this->access_token)
-                ->withHeaders([
-                    'session-id' => $this->session_id
-                ])
-                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
-                    return $this->retryCallback($e, $request);
-                })
-                ->delete($url)
-                ->throwUnlessStatus(200);
-
+            $this->deleteQuestion($question_id);
             $this->banner(__('Question successfully deleted'));
         } catch (\Exception $e) {
+            Log::error('Failed to delete question: ' . $e->getMessage());
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
 
-        $this->confirm_delete = !$this->confirm_delete;
+        $this->confirm_delete = ! $this->confirm_delete;
     }
 
     public function fetchData($page = null)

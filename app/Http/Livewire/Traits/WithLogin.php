@@ -35,6 +35,8 @@ trait WithLogin
         'modify-question',
         'modify-vote',
         'close-question',
+        'secure-question',
+        'secure-quiz',
         'vote',
     ];
 

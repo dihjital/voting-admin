@@ -37,6 +37,7 @@ class ShowQuestions extends Component
     public $question_id;
     public $question_text;
     public $question_close_at = null;
+    public bool $show_current_votes = true;
 
     public $quiz_id;
 
@@ -56,6 +57,7 @@ class ShowQuestions extends Component
         'question_text' => 'required|min:6',
         // 'is_closed' => 'nullable|boolean', If the new question modal has a toggle for this property
         // 'is_secure' => 'nullable|boolean', If the new question modal has a toggle for this property
+        'show_current_votes' => 'required|bool',
         'question_close_at' => 'nullable|date',
     ];
 
@@ -211,14 +213,26 @@ class ShowQuestions extends Component
                 ->get($url)
                 ->throwUnlessStatus(200);
 
+            $this->extractQuestionData($response);
+        } catch (\Exception $e) {
+            $this->error_message = $this->parseErrorMessage($e->getMessage());
+        }
+    }
+
+    protected function extractQuestionData($response): void
+    {
+        if ($response) {
+            // Question text
             $this->question_text = $response->json()['question_text'];
 
+            // Question close date
             $closed_at = $response->json()['closed_at'];
             $this->question_close_at = $closed_at
                 ? Carbon::parse($closed_at)->format('m/d/Y')
                 : null;
-        } catch (\Exception $e) {
-            $this->error_message = $this->parseErrorMessage($e->getMessage());
+
+            // Show current votes for question
+            $this->show_current_votes = $response->json()['show_current_votes'];
         }
     }
 
@@ -277,6 +291,7 @@ class ShowQuestions extends Component
                 ->put($url, [
                     'question_text' => $this->question_text,
                     'closed_at' => $this->question_close_at ?? null,
+                    'show_current_votes' => $this->show_current_votes,
                 ])
                 ->throwUnlessStatus(200);
 

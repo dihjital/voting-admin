@@ -31,6 +31,9 @@
                     @if($q['is_secure'])
                         <i class="fa-solid fa-user-secret" title="{{ __('A valid e-mail is required to vote for this question') }}"></i>
                     @endif
+                    @if(! $q['show_current_votes'])
+                        <i class="fa-solid fa-eye-slash" title="{{ __('Current votes will NOT be shown during voting') }}"></i>
+                    @endif
                 </x-table.cell>
                 <x-table.cell>
                     <a href="/questions/{{ $q['id'] }}/votes">
@@ -168,7 +171,6 @@
 
         <x-slot name="content">
             {{ __('Please enter your new text for the selected question') }}
-
             <div class="mt-4 mb-2" x-data="{}" x-on:confirming-question-update.window="setTimeout(() => $refs.question_text.focus(), 250)">
                 <x-input type="text" class="mt-1 block w-3/4"
                             autocomplete=""
@@ -181,10 +183,19 @@
             </div>
 
             {{ __('You can specify a date when the question should be closed automatically by the system.') }}
-            <div class="relative w-3/4 mt-4" x-data="{}" x-on:confirming-question-update.window="setTimeout(() => $refs.question_close_at.focus(), 250)">
+            <div class="relative w-3/4 mt-4 mb-2" x-data="{}">
                 <x-date-picker wire:model.defer="question_close_at" id="question_close_at" /> 
                 <!-- TODO: Error message is breaking the display //-->
                 <x-input-error for="question_close_at" class="mt-2" />
+            </div>
+
+            <div class="relative inline-flex items-center w-3/4 mt-4 mb-2" x-data="{}">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" wire:model.defer="show_current_votes" value="" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
+                </label>
+                {{ __('Respondents will see current votes during voting.') }}
             </div>
         </x-slot>
 

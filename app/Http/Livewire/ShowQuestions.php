@@ -38,6 +38,9 @@ class ShowQuestions extends Component
     public $question_text;
     public $question_close_at = null;
     public bool $show_current_votes = true;
+    public $correct_vote;
+
+    public array $votes = []; // Voting options for the selected question
 
     public $quiz_id;
 
@@ -233,6 +236,12 @@ class ShowQuestions extends Component
 
             // Show current votes for question
             $this->show_current_votes = $response->json()['show_current_votes'];
+
+            // Correct vote if set. Will return the id of the vote.
+            $this->correct_vote = $response->json()['correct_vote'];
+
+            // Get the voting options for this question
+            $this->votes = $response->json()['votes'];
         }
     }
 

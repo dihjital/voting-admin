@@ -189,6 +189,26 @@
                 <x-input-error for="question_close_at" class="mt-2" />
             </div>
 
+            {{ __('If this question has a \'right\' answer then you can select it here. By default all answers are correct.') }}
+            <div class="relative w-3/4 mt-4 mb-2" x-data="{}">
+                <select id="question-correct-vote-{{ $question_id }}"
+                        wire:model="correct_vote"
+                        class="mt-1 block w-full rounded-md
+                            block flex-1 min-w-0
+                            border-gray-300 dark:border-gray-700 dark:bg-gray-900
+                            py-2 px-3 shadow-sm
+                            dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
+                            sm:text-sm">
+                        <option>{{ __('Please select') }}!</option>
+                    @forelse($votes as $vote)
+                        <option value="{{ $vote['id'] }}">
+                            {{ $vote['vote_text'] }}
+                        </option>
+                    @empty
+                    @endforelse
+                </select>
+            </div>
+
             <div class="relative inline-flex items-center w-3/4 mt-4 mb-2" x-data="{}">
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" wire:model.defer="show_current_votes" value="" class="sr-only peer">

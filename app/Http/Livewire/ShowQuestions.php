@@ -62,6 +62,7 @@ class ShowQuestions extends Component
         // 'is_secure' => 'nullable|boolean', If the new question modal has a toggle for this property
         'show_current_votes' => 'required|bool',
         'question_close_at' => 'nullable|date',
+        'correct_vote' => 'nullable|integer',
     ];
 
     protected function initializeFiltering()
@@ -301,6 +302,7 @@ class ShowQuestions extends Component
                     'question_text' => $this->question_text,
                     'closed_at' => $this->question_close_at ?? null,
                     'show_current_votes' => $this->show_current_votes,
+                    'correct_vote' => $this->correct_vote ?? null,
                 ])
                 ->throwUnlessStatus(200);
 

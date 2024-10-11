@@ -3,6 +3,7 @@
     x-data="{
 
         voteResults: @entangle('votes'),
+        correctVote: @entangle('correct_vote'),
 
         init() {
             const createVoteBarCharts = () => {
@@ -11,7 +12,7 @@
                     : undefined;
 
                 this.voteResults.forEach(item => {
-                    createSVGBar(item['id'], item['number_of_votes'], sumOfVotes);
+                    createSVGBar(item['id'], item['number_of_votes'], sumOfVotes, this.correctVote === item['id'] ? true : false);
                 });
             };
 
@@ -47,12 +48,19 @@
             @forelse($votes as $v)
             <x-table.row wire:loading.class.delay="opacity-75" wire:key="row-{{ $v['id'] }}">
                 <x-table.cell>
-                    {{ $v['id'] }}
+                    <div class="flex space-x-4 items-center">
+                    <span>
+                        {{ $v['id'] }}
+                    </span>
                     @if($v['image_path'])
                         <a href="#" wire:click="toggleShowImageModal({{ $v['id'] }})">
-                            <i class="fas fa-paperclip fa-sm ml-2" aria-hidden="true" title="{{ $v['vote_text'] }}"></i>
+                            <i class="fas fa-paperclip fa-sm" aria-hidden="true" title="{{ $v['vote_text'] }}"></i>
                         </a>
                     @endif
+                    @if($v['id'] === $correct_vote)
+                        <i class="fas fa-check fa-sm" aria-hidden="true" title="{{ __('This is the correct vote set by the owner of this question.') }}"></i>
+                    @endif
+                    </div>
                 </x-table.cell>
                 <x-table.cell class="space-y-2">
                     <div>{{ $v['vote_text'] }}</div>
@@ -269,7 +277,7 @@
 
     @push('scripts')
         <script>
-            function createSVGBar(id, numberOfVotes, sumOfVotes) {
+            function createSVGBar(id, numberOfVotes, sumOfVotes, correctVote = false) {
                 if (!numberOfVotes) return false;
                 
                 let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -283,7 +291,12 @@
                 rect.setAttribute('ry', '4');
                 rect.setAttribute('width', '0');
                 rect.setAttribute('height', '10');
-                rect.setAttribute('class', 'fill-current text-blue-200 dark:text-gray-200');
+                rect.setAttribute('class', 'text-blue-200 dark:text-gray-200');
+
+                correctVote === true
+                    ? rect.setAttribute('fill', '#6366F1')
+                    : rect.setAttribute('fill', 'currentColor');
+
                 svg.appendChild(rect);
 
                 const width = (numberOfVotes / sumOfVotes) * 100;

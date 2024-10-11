@@ -83,4 +83,24 @@ trait WithRESTApiCalls
             ->delete($url)
             ->throwUnlessStatus(200);
     }
+
+    public function getQuestion($question_id): ?array
+    {
+        // Get the question text and whether it is open for any modification ...
+        $url = config('services.api.endpoint',
+            fn() => throw new \Exception('No API endpoint is defined')
+        ).'/questions/'.$this->question_id;
+
+        $response = Http::withToken($this->access_token)
+            ->withHeaders([
+                'session-id' => $this->session_id
+            ])
+            ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
+                return $this->retryCallback($e, $request);
+            })
+            ->get($url)
+            ->throwUnlessStatus(200);
+
+        return $response->json();
+    }
 }

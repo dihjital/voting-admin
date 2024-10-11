@@ -13,17 +13,22 @@ use Livewire\WithFileUploads;
 use App\Http\Livewire\Traits\WithLogin;
 use App\Http\Livewire\Traits\WithUUIDSession;
 use App\Http\Livewire\Traits\WithErrorMessage;
-
+use App\Http\Livewire\Traits\WithRESTApiCalls;
 use Illuminate\Http\Client\PendingRequest;
 
 class ShowOneQuestion extends Component
 {
-    use InteractsWithBanner, WithErrorMessage, WithLogin, WithUUIDSession;
+    use InteractsWithBanner;
+    use WithErrorMessage;
+    use WithLogin;
+    use WithUUIDSession;
     use WithFileUploads;
+    use WithRESTApiCalls;
 
     public $question_id;
     public $question_text;
     public $question_closed = false;
+    public $correct_vote;
 
     public $votes;
     public $vote_id;
@@ -98,29 +103,20 @@ class ShowOneQuestion extends Component
 
             $this->votes = $response->json();
 
-            // Get the question text and whether it is open for any modification ...
-            $url = config('services.api.endpoint',
-                fn() => throw new \Exception('No API endpoint is defined')
-            ).'/questions/'.$this->question_id;
+            $this->extractQuestionProperties($this->getQuestion($this->question_id));
 
-            $response = Http::withToken($this->access_token)
-                ->withHeaders([
-                    'session-id' => $this->session_id
-                ])
-                ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
-                    return $this->retryCallback($e, $request);
-                })
-                ->get($url)
-                ->throwUnlessStatus(200);
-            
-            $this->question_text = $response->json()['question_text'];
-            $this->question_closed = $response->json()['is_closed'] ?? false;
-            
             // Inform the page that new data has been fetched
             $this->emit('data-fetched');
         } catch (\Exception $e) {
             $this->error_message = $this->parseErrorMessage($e->getMessage());
         }
+    }
+
+    protected function extractQuestionProperties(?array $question): void
+    {
+        $this->question_text = $question['question_text'];
+        $this->question_closed = $question['is_closed'] ?? false;
+        $this->correct_vote = $question['correct_vote'] ?? null;
     }
 
     public function toggleShowImageModal($vote_id)

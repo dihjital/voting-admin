@@ -50,7 +50,7 @@
                 <x-table.cell>
                     <div class="flex space-x-4 items-center">
                     <span>
-                        {{ $v['id'] }}
+                        {{ $letters[$loop->index] }})
                     </span>
                     @if($v['image_path'])
                         <a href="#" wire:click="toggleShowImageModal({{ $v['id'] }})">

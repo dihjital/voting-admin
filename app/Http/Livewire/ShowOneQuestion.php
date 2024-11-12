@@ -35,8 +35,10 @@ class ShowOneQuestion extends Component
     public $vote_text;
     public $vote_image;
     public $image_url;
+
+    public array $letters; // Letters for each vote
     
-    public $reset_number_of_votes = false; // if set to true, updating a vote will reset the number_of_votes to 0 
+    public $reset_number_of_votes = false; // If set to true, updating a vote will reset the number_of_votes to 0 
 
     // Modal controllers
     public $confirm_delete = false;
@@ -52,6 +54,7 @@ class ShowOneQuestion extends Component
     public function mount($question_id)
     {
         $this->question_id = $question_id;
+        $this->letters = range('A', 'Z');
         
         try {
             list(

@@ -19,9 +19,6 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('/register', fn() => abort(404));
-Route::post('/register', fn() => abort(404));
-
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),

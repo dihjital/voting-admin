@@ -15,6 +15,7 @@ class ProcessUserChanged implements ShouldQueue
 {
     protected const PYTHON = '/usr/bin/python3';
     protected const COPY_USERS_CMD = '/usr/bin/copy_users.py';
+    protected const SYNC_USERS_CMD = '/usr/bin/sync_users.py';
 
     /**
      * Create the event listener.
@@ -35,7 +36,7 @@ class ProcessUserChanged implements ShouldQueue
                 ->env([
                     'SRC_DB' => env('DB_DATABASE', database_path('database.sqlite'))
                 ])
-                ->run(self::PYTHON.' '.self::COPY_USERS_CMD)->throw();
+                ->run(self::PYTHON.' '.self::SYNC_USERS_CMD)->throw();
             Log::info($process->output());
         } catch (ProcessFailedException $e) {
             Log::error($e->getMessage());

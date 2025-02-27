@@ -274,48 +274,4 @@
             </x-secondary-button>
         </x-slot>
     </x-dialog-modal>
-
-    @push('scripts')
-        <script>
-            function createSVGBar(id, numberOfVotes, sumOfVotes, correctVote = false) {
-                if (!numberOfVotes) return false;
-                
-                let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.setAttribute('width', '100%');
-                svg.setAttribute('height', '10');
-
-                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                rect.setAttribute('x', '0');
-                rect.setAttribute('y', '0');
-                rect.setAttribute('rx', '4');
-                rect.setAttribute('ry', '4');
-                rect.setAttribute('width', '0');
-                rect.setAttribute('height', '10');
-                rect.setAttribute('class', 'text-blue-200 dark:text-gray-200');
-
-                correctVote === true
-                    ? rect.setAttribute('fill', '#6366F1')
-                    : rect.setAttribute('fill', 'currentColor');
-
-                svg.appendChild(rect);
-
-                const width = (numberOfVotes / sumOfVotes) * 100;
-                const scale = 0.9; // scale the widh down so the label will fit
-
-                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                label.setAttribute('x', width * scale + 2 + '%');
-                label.setAttribute('y', '10');
-                label.setAttribute('fill', localStorage.getItem('darkMode') === "dark" ? 'lightgray' : 'black');
-                label.setAttribute('class', 'fill-current text-gray-500 dark:text-gray-400');
-                label.style.fontSize = '12px';
-                label.textContent = width.toFixed(1) + '%';
-                svg.appendChild(label);
-
-                document.getElementById('bar-id-' + id).appendChild(svg);
-
-                rect.setAttribute('width', width * scale + '%');
-            }
-        </script>
-    @endpush
-
 </div>

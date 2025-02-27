@@ -12,6 +12,13 @@ export default {
         './node_modules/flowbite/**/*.js',
     ],
 
+    safelist: [
+        'text-blue-200',
+        'text-gray-200',
+        'text-gray-400',
+        'text-gray-500',
+    ],
+
     darkMode: 'class',
 
     theme: {

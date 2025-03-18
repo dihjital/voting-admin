@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 
+use Exception;
+
 trait WithUUIDSession
 {
     public $session_id;
@@ -61,8 +63,8 @@ trait WithUUIDSession
                     .'/session/'.$this->session_id
                 )
                 ->throwUnlessStatus(200);
-        } catch (\Exception $e) {
-            Log::debug('Tried to delete session_id but failed: '.$this->session_id);
+        } catch (Exception $e) {
+            Log::debug('Tried to delete session_id but failed: ' . $this->session_id);
             Log::error('deleteSession: '.$e->getMessage());
         }
 
@@ -73,9 +75,9 @@ trait WithUUIDSession
     protected function requestNewSessionId($access_token, $user_id = '')
     {
         $response = Http::withToken($access_token)
-            ->retry(3, 500, function (\Exception $e, PendingRequest $request) {
-                if (! $e instanceof RequestException || !in_array($e->response->status(), [401, 403])) {
-                    Log::debug('requestNewSessionId: Request failed with status code: '.$e->response->status());
+            ->retry(3, 500, function (Exception $e, PendingRequest $request) {
+                if (! $e instanceof RequestException || ! in_array($e->response->status(), [401, 403])) {
+                    Log::debug('requestNewSessionId: Request failed with: ' . $e->getMessage());
                     return false;
                 }
             
@@ -97,7 +99,7 @@ trait WithUUIDSession
             })
             ->post(
                 config('services.api.endpoint',
-                        fn() => throw new \Exception('No API endpoint is defined')
+                    fn() => throw new Exception('No API endpoint is defined')
                 ).'/session', 
                 ['user_id' => $user_id ?: Auth::id(),]
             )

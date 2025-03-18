@@ -6,6 +6,7 @@ services:
       - "5173:5173"
     volumes:
       - .:/var/www
+      - /var/www/vendor/
       - /var/www/node_modules/
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     networks:

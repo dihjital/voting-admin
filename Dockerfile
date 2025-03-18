@@ -18,8 +18,16 @@ RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \ 
     gnupg \
+    libmagickwand-dev \
+    libmagickcore-dev \
+    imagemagick \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql pdo_sqlite
+
+# Manually clone, build, and install Imagick for PHP 8.3
+RUN git clone --depth 1 https://github.com/Imagick/imagick /usr/src/php/ext/imagick \
+    && docker-php-ext-install imagick \
+    && docker-php-ext-enable imagick
 
 # Install Node.js and npm
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && apt-get install -y nodejs
@@ -46,6 +54,9 @@ COPY .docker/nginx/nginx.conf /etc/nginx/nginx.conf
 # Copy the supervisor configuration file and create the log directory
 COPY .docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p /var/log/supervisor && chmod -R 777 /var/log/supervisor
+
+# Clean up unnecessary files to reduce image size
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Expose ports for web and vite
 EXPOSE 80 5173

@@ -15,7 +15,6 @@ RUN apt-get update && apt-get install -y \
     unzip \
     sqlite3 \
     libsqlite3-dev \
-    nginx \
     supervisor \ 
     gnupg \
     libmagickwand-dev \
@@ -55,9 +54,6 @@ RUN userdel -f www-data &&\
 # Set permissions for storage, bootstrap/cache, and database directories
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/database
-
-# Copy the Nginx configuration file
-COPY .docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Copy the supervisor configuration file and create the log directory
 COPY .docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

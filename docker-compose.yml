@@ -1,8 +1,8 @@
 services:
 
-  nginx:
+  forward-proxy_voting-admin:
       image: nginx:alpine
-      container_name: nginx
+      container_name: forward-proxy_voting-admin
       restart: unless-stopped
       tty: true
       ports:
@@ -11,22 +11,23 @@ services:
         - .docker/proxy/nginx.conf:/etc/nginx/conf.d/default.conf
         - .:/var/www/:delegated
       depends_on:
-        - app
+        - voting-admin_app
       networks:
-        - app-network
+        - voting-admin_app-network
 
-  app:
+  voting-admin_app:
     build: .
+    container_name: voting-admin_app
     ports:
       - "5173:5173" # Vite
     volumes:
       - .:/var/www:delegated
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     networks:
-      - app-network
+      - voting-admin_app-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
 networks:
-  app-network:
+  voting-admin_app-network:
     driver: bridge
